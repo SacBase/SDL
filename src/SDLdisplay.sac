@@ -19,12 +19,12 @@ external int destroyDisplay( SDLdisplay disp);
 external void drawArray( SDLdisplay &disp, color[.,.] array);
 #pragma linkobj "src/SDL/drawArray.o"
 #pragma linkwith "SDL"
-#pragma refcounting [2]
+#pragma refcounting [1]
 
 external void drawPixel( SDLdisplay &disp, int[.] idx, color val);
 #pragma linkobj "src/SDL/drawPixel.o"
 #pragma linkwith "SDL"
-#pragma refcounting [2,3]
+#pragma refcounting [1,2]
 
 #if THEO_IS_A_SUPERHERO
 void drawArrayDynamic( SDLdisplay &disp, color[.,.] array)

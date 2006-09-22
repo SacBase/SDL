@@ -2,11 +2,11 @@
 
 #include <unistd.h>
 
-void drawArray( SAC_ND_PARAM_inout_nodesc( disp_nt, Display),
+void drawArray( SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
                 SAC_ND_PARAM_in( ar_nt, int))
 {
   int xaxis, yaxis, aroffset, screenoffset;
-  
+
   /*
    * accessing the display needs to be mutually exclusive
    */

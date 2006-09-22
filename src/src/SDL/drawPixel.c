@@ -1,6 +1,6 @@
 #include "SDLsac.h"
 
-void drawPixel( SAC_ND_PARAM_inout_nodesc( disp_nt, Display),
+void drawPixel( SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
                 SAC_ND_PARAM_in( shp_nt, int),
                 SAC_ND_PARAM_in( color_nt, int))
 {
