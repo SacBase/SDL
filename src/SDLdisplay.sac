@@ -1,0 +1,37 @@
+class SDLdisplay;
+
+external classtype;
+
+use Color8: all;
+use Array: {*};
+
+provide all;
+
+external SDLdisplay initDisplay( int[.] shp);
+#pragma linkobj "src/SDL/initDisplay.o"
+#pragma linkwith "SDL"
+#pragma refcounting [1]
+
+external int destroyDisplay( SDLdisplay disp);
+#pragma linkobj "src/SDL/destroyDisplay.o"
+#pragma linkwith "SDL"
+
+external void drawArray( SDLdisplay &disp, color[.,.] array);
+#pragma linkobj "src/SDL/drawArray.o"
+#pragma linkwith "SDL"
+#pragma refcounting [2]
+
+external void drawPixel( SDLdisplay &disp, int[.] idx, color val);
+#pragma linkobj "src/SDL/drawPixel.o"
+#pragma linkwith "SDL"
+#pragma refcounting [2,3]
+
+#if THEO_IS_A_SUPERHERO
+void drawArrayDynamic( SDLdisplay &disp, color[.,.] array)
+{
+  res = with( iv)
+          ( 0*shape( array) <= iv < shape( array)) : drawPixel( disp, iv, array[iv]);
+        propagate( disp);
+  return();
+}
+#endif
