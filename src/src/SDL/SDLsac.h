@@ -12,8 +12,7 @@ extern SDL_mutex *SDLsac_mutex;
 extern SDL_TimerID SDLsac_timer;
 
 #define disp_nt (disp, (SCL, (HID, (NUQ,))))
-#define dispin_nt (dispin, (SCL, (HID, (NUQ,))))
-#define dispout_nt (dispout, (SCL, (HID, (NUQ,))))
+#define disp_nt (disp, (SCL, (HID, (NUQ,))))
 #define shp_nt  (shp, (AKD, (NHD, (NUQ,))))
 #define ar_nt   (ar, (AKD, (NHD, (NUQ,))))
 #define color_nt (col, (AKS, (NHD, (NUQ,))))
