@@ -96,7 +96,7 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
   /*
    * start a display update timer to update 20 times a second
    */
-  SDLsac_timer = SDL_AddTimer( 100, TimerHandler, SAC_ND_A_FIELD( disp_nt));
+  SDLsac_timer = SDL_AddTimer( 500, TimerHandler, SAC_ND_A_FIELD( disp_nt));
   if ( SDLsac_timer == NULL) {
     SAC_RuntimeError( "Failed to init update timer");
   }
