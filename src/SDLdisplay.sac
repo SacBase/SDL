@@ -29,9 +29,9 @@ external void drawPixel( SDLdisplay &disp, int[.] idx, color val);
 #if THEO_IS_A_SUPERHERO
 void drawArrayDynamic( SDLdisplay &disp, color[.,.] array)
 {
-  res = with( iv)
+  res = with {
           ( 0*shape( array) <= iv < shape( array)) : drawPixel( disp, iv, array[iv]);
-        propagate( disp);
+        } : propagate( disp );
   return();
 }
 #endif
