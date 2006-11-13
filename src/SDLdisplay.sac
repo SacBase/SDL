@@ -10,10 +10,12 @@ provide all;
 external SDLdisplay initDisplay( int[.] shp);
 #pragma linkobj "src/SDL/initDisplay.o"
 #pragma linkwith "SDL"
+#pragma effect World::TheWorld
 #pragma refcounting [1]
 
 external int destroyDisplay( SDLdisplay disp);
 #pragma linkobj "src/SDL/destroyDisplay.o"
+#pragma effect World::TheWorld
 #pragma linkwith "SDL"
 
 external void drawArray( SDLdisplay &disp, color[.,.] array);
