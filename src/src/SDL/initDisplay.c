@@ -86,7 +86,7 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
     SAC_RuntimeError( "Failed to init SDL Display: %s", SDL_GetError());
   }
 
-  SDL_WM_SetCaption( "SaC SimpleDisplay Output", NULL);
+  SDL_WM_SetCaption( "SaC SDL Output", NULL);
 
   /*
    * register an event handler 
