@@ -61,6 +61,10 @@ void drawArray( SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
     SDL_UnlockSurface( NT_NAME( disp_nt));
   }
 
+  if( !SDLsac_isasync) {
+    SDL_UpdateRect( NT_NAME( disp_nt), 0, 0, 0, 0);
+  }
+
   /*
    * accessing the display needs to be mutually exclusive
    */

@@ -7,14 +7,12 @@ void drawPixel( SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
   int xoffset, yoffset;
   Uint32 *bptr;
 
-#ifndef NO_LOCK
   /*
    * accessing the display needs to be mutually exclusive
    */
   if (SDL_mutexP( SDLsac_mutex)==-1){
     SAC_RuntimeError( "Failed to lock the access mutex");
   }
-#endif
 
   /*
    * check bounds
@@ -57,14 +55,17 @@ void drawPixel( SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
     SDL_UnlockSurface( NT_NAME( disp_nt));
   }
 
-#ifndef NO_LOCK
+  if( !SDLsac_isasync) {
+    SDL_UpdateRect( NT_NAME( disp_nt), SAC_ND_A_FIELD( shp_nt)[1],
+                    SAC_ND_A_FIELD( shp_nt)[0], 1, 1);
+  }
+
   /*
    * accessing the display needs to be mutually exclusive
    */
   if (SDL_mutexV( SDLsac_mutex)==-1){
     SAC_RuntimeError( "Failed to unlock the access mutex");
   }
-#endif
 
   SAC_ND_DEC_RC_FREE( shp_nt, 1, )
   SAC_ND_DEC_RC_FREE( color_nt, 1, )

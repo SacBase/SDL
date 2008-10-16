@@ -7,7 +7,12 @@ use Array: {*};
 
 provide all;
 
-external SDLdisplay initDisplay( int[.] shp);
+SDLdisplay initDisplay( int[.] shp)
+{
+  return( initDisplay( shp, true));
+}
+
+external SDLdisplay initDisplay( int[.] shp, bool async);
 #pragma linkobj "src/SDL/initDisplay.o"
 #pragma linkwith "SDL"
 #pragma effect World::TheWorld

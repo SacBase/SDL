@@ -6,6 +6,8 @@ SDL_Thread *SDLsac_eventhandler = NULL;
 SDL_mutex *SDLsac_mutex = NULL;
 SDL_TimerID SDLsac_timer = NULL;
 
+bool SDLsac_isasync;
+
 static
 void updateScreen( SDL_Surface  *surface)
 {
@@ -67,7 +69,8 @@ Uint32 TimerHandler(Uint32 interval, void *param) {
 
 
 void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
-                  SAC_ND_PARAM_in( shp_nt, int))
+                  SAC_ND_PARAM_in( shp_nt, int),
+                  SAC_ND_PARAM_in( async_nt, bool))
 {
   SAC_ND_DECL__DATA( disp_nt, Display, )
 
@@ -88,18 +91,22 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
 
   SDL_WM_SetCaption( "SaC SDL Output", NULL);
 
-  /*
-   * register an event handler 
-   */ 
-  SDLsac_eventhandler = SDL_CreateThread( EventHandler, NULL);
+  SDLsac_isasync = SAC_ND_A_FIELD( async_nt);
+
+  if( SDLsac_isasync) {
+    /*
+     * register an event handler 
+     */ 
+    SDLsac_eventhandler = SDL_CreateThread( EventHandler, NULL);
   
-  /*
-   * start a display update timer to update 20 times a second
-   */
-  SDLsac_timer = SDL_AddTimer( 500, TimerHandler, SAC_ND_A_FIELD( disp_nt));
-  if ( SDLsac_timer == NULL) {
-    SAC_RuntimeError( "Failed to init update timer");
-  }
+    /*
+     * start a display update timer to update 20 times a second
+     */
+    SDLsac_timer = SDL_AddTimer( 500, TimerHandler, SAC_ND_A_FIELD( disp_nt));
+    if ( SDLsac_timer == NULL) {
+      SAC_RuntimeError( "Failed to init update timer");
+    }
+  } 
 
   /*
    * and a shiny mutex as well
