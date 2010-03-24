@@ -77,8 +77,9 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
   if (SDL_Init( SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
     SAC_RuntimeError( "Failed to init SDL System: %s", SDL_GetError());
   }
-  
+#if SDL_QUIT_NICE  
   atexit( SDL_Quit);
+#endif
 
   SAC_ND_A_FIELD( disp_nt) = 
     SDL_SetVideoMode( SAC_ND_A_FIELD( shp_nt)[1], 
