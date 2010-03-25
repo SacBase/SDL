@@ -28,6 +28,11 @@ external void drawArray( SDLdisplay &disp, color[.,.] array);
 #pragma linkwith "SDL"
 #pragma refcounting [1]
 
+external void drawArrayOffset( SDLdisplay &disp, color[.,.] array, int[2] pic_offset);
+#pragma linkobj "src/SDL/drawArrayOffset.o"
+#pragma linkwith "SDL"
+#pragma refcounting [1]
+
 external void drawPixel( SDLdisplay &disp, int[.] idx, color val);
 #pragma linkobj "src/SDL/drawPixel.o"
 #pragma linkwith "SDL"
