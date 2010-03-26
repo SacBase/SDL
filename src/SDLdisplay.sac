@@ -3,13 +3,28 @@ class SDLdisplay;
 external classtype;
 
 use Color8: all;
-use Array: {*};
+use Array: {*,+,-};
 
 provide all;
 
 SDLdisplay initDisplay( int[.] shp)
 {
   return( initDisplay( shp, true));
+}
+
+SDLdisplay initMultiDisplay( int[.] layout, int[.] disp_shp)
+{
+  size = layout * disp_shp + (layout-1)*3;
+
+  res = initDisplay( size, true);
+
+  frame = with {
+            ( . <= iv <= . step (disp_shp + 3) width disp_shp) : black();
+          } : genarray( size, white());
+
+  drawArray( res, frame);
+
+  return( res);
 }
 
 external SDLdisplay initDisplay( int[.] shp, bool async);
@@ -27,6 +42,11 @@ external void drawArray( SDLdisplay &disp, color[.,.] array);
 #pragma linkobj "src/SDL/drawArray.o"
 #pragma linkwith "SDL"
 #pragma refcounting [1]
+
+void drawArrayMulti( SDLdisplay &disp, color[.,.] array, int[.] pos)
+{
+  drawArrayOffset( disp, array, (shape( array)+3) * pos);
+}
 
 external void drawArrayOffset( SDLdisplay &disp, color[.,.] array, int[2] pic_offset);
 #pragma linkobj "src/SDL/drawArrayOffset.o"
