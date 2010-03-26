@@ -2,9 +2,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#define ADAPTIVE_MODE
+#define MIN_UPDATE_INTERVAL 50
+#define START_UPDATE_INTERVAL 50
+
 SDL_Thread *SDLsac_eventhandler = NULL;
 SDL_mutex *SDLsac_mutex = NULL;
 SDL_TimerID SDLsac_timer = NULL;
+SDL_sem *SDLsac_updatesem = NULL;
 
 bool SDLsac_isasync;
 
@@ -32,15 +37,23 @@ static
 int EventHandler( void *data)
 {
   SDL_Event event;
+  int done = 0;
 
-  while ( 1) {
+  while ( !done) {
     if (SDL_WaitEvent( &event) == 1) {
       switch (event.type) {
         case SDL_QUIT:
+          /* someone clicked the close button on the window */
+          SDL_Quit();
           exit(10);
           break;
-        case SDL_USEREVENT:
+
+        case SDL_USEREVENT_DRAW:
           updateScreen( (SDL_Surface *) event.user.data1);
+          break;
+
+        case SDL_USEREVENT_QUIT:
+          done = 1;
           break;
 
         default:
@@ -48,22 +61,39 @@ int EventHandler( void *data)
       }
     }
   }
+
+  return 0;
 }
 
 static
 Uint32 TimerHandler(Uint32 interval, void *param) {
   SDL_Event event;
-  SDL_UserEvent userevent;
+#ifdef ADAPTIVE_MODE
+  int eventqueue;
+#endif
 
-  userevent.type = SDL_USEREVENT;
-  userevent.code = 0;
-  userevent.data1 = param;
-  userevent.data2 = NULL;
+#ifdef ADAPTIVE_MODE
+  eventqueue = SDL_PeepEvents( &event, 
+                               1, 
+                               SDL_PEEKEVENT, 
+                               SDL_EVENTMASK( SDL_USEREVENT_DRAW));
 
-  event.type = SDL_USEREVENT;
-  event.user = userevent;
+  if (eventqueue == 1) {
+    /* an event overtook us, so we are too fast */
+    interval *= 2;
+  } else if (interval > MIN_UPDATE_INTERVAL + 10) {
+    /* nothing waiting, we can speed up :-) */
+    interval -= 10;
+  }
+#endif
+
+  event.type = SDL_USEREVENT_DRAW;
+  event.user.code = 0;
+  event.user.data1 = param;
+  event.user.data2 = NULL;
 
   SDL_PushEvent(&event);
+
   return(interval);
 }
 
@@ -77,9 +107,6 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
   if (SDL_Init( SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
     SAC_RuntimeError( "Failed to init SDL System: %s", SDL_GetError());
   }
-#if SDL_QUIT_NICE  
-  atexit( SDL_Quit);
-#endif
 
   SAC_ND_A_FIELD( disp_nt) = 
     SDL_SetVideoMode( SAC_ND_A_FIELD( shp_nt)[1], 
@@ -94,6 +121,11 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
 
   SDLsac_isasync = SAC_ND_A_FIELD( async_nt);
 
+  /*
+   * a shiny mutex 
+   */
+  SDLsac_mutex = SDL_CreateMutex();
+
   if( SDLsac_isasync) {
     /*
      * register an event handler 
@@ -101,18 +133,15 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
     SDLsac_eventhandler = SDL_CreateThread( EventHandler, NULL);
   
     /*
-     * start a display update timer to update 20 times a second
+     * start a display update timer 
      */
-    SDLsac_timer = SDL_AddTimer( 500, TimerHandler, SAC_ND_A_FIELD( disp_nt));
+    SDLsac_timer = SDL_AddTimer( START_UPDATE_INTERVAL, 
+                                 TimerHandler, 
+                                 SAC_ND_A_FIELD( disp_nt));
     if ( SDLsac_timer == NULL) {
       SAC_RuntimeError( "Failed to init update timer");
     }
   } 
-
-  /*
-   * and a shiny mutex as well
-   */
-  SDLsac_mutex = SDL_CreateMutex();
 
   * SAC_NAMEP( SAC_ND_A_FIELD( disp_nt)) = SAC_ND_A_FIELD( disp_nt);
   

@@ -13,6 +13,9 @@ extern SDL_TimerID SDLsac_timer;
 
 extern bool SDLsac_isasync;
 
+#define SDL_USEREVENT_DRAW (SDL_USEREVENT + 1)
+#define SDL_USEREVENT_QUIT (SDL_USEREVENT + 2)
+
 #define disp_nt (disp, T_OLD((SCL, (HID, (NUQ,)))))
 #define disp_nt (disp, T_OLD((SCL, (HID, (NUQ,)))))
 #define shp_nt  (shp, T_OLD((AKD, (NHD, (NUQ,)))))
