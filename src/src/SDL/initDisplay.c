@@ -4,7 +4,7 @@
 
 #define ADAPTIVE_MODE
 #define MIN_UPDATE_INTERVAL 50
-#define START_UPDATE_INTERVAL 50
+#define START_UPDATE_INTERVAL 250
 
 SDL_Thread *SDLsac_eventhandler = NULL;
 SDL_mutex *SDLsac_mutex = NULL;
@@ -23,7 +23,7 @@ void updateScreen( SDL_Surface  *surface)
     SAC_RuntimeError( "Failed to lock the access mutex");
   }
 
-  SDL_UpdateRect( surface, 0, 0, 0, 0);
+  SDL_Flip( surface);
 
   /*
    * accessing the display needs to be mutually exclusive

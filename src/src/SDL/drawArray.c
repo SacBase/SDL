@@ -62,7 +62,7 @@ void drawArray( SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
   }
 
   if( !SDLsac_isasync) {
-    SDL_UpdateRect( NT_NAME( disp_nt), 0, 0, 0, 0);
+    SDL_Flip( NT_NAME( disp_nt));
   }
 
   /*
