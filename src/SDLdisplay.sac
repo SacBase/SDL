@@ -54,7 +54,7 @@ external void drawArray( SDLdisplay &disp, color[.,.] array);
 
 void drawArrayMulti( SDLdisplay &disp, color[.,.] array, int[2] pos)
 {
-  drawArrayOffset( disp, array, (shape( array)+3) * pos);
+  drawArrayOffset( disp, array, (shape( array)+3) *  pos);
 }
 
 external void drawArrayOffset( SDLdisplay &disp, 
