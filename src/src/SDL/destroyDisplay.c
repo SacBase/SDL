@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void destroyDisplay( SAC_ND_PARAM_in_nodesc( disp_nt, Display))
+void SAC_SDL_destroyDisplay( SAC_ND_PARAM_in_nodesc( disp_nt, Display))
 {
   SDL_Event event;
 
@@ -32,6 +32,9 @@ void destroyDisplay( SAC_ND_PARAM_in_nodesc( disp_nt, Display))
     SDL_DestroySemaphore( SDLsac_updatesem);
 #endif
   }
+
+  /* destroy the semaphore */
+  SDL_DestroySemaphore( SDLsac_selectsem);
 
   /* finally, we can release this */
   if (SDLsac_mutex != NULL) {

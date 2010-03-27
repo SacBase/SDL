@@ -28,17 +28,20 @@ SDLdisplay initMultiDisplay( int[.] layout, int[.] disp_shp)
 }
 
 external SDLdisplay initDisplay( int[.] shp, bool async);
+#pragma linkname "SAC_SDL_initDisplay"
 #pragma linkobj "src/SDL/initDisplay.o"
 #pragma linkwith "SDL"
 #pragma effect World::TheWorld
 #pragma refcounting [1]
 
 external void destroyDisplay( SDLdisplay disp);
+#pragma linkname "SAC_SDL_destroyDisplay"
 #pragma linkobj "src/SDL/destroyDisplay.o"
 #pragma effect World::TheWorld
 #pragma linkwith "SDL"
 
 external void drawArray( SDLdisplay &disp, color[.,.] array);
+#pragma linkname "SAC_SDL_drawArray"
 #pragma linkobj "src/SDL/drawArray.o"
 #pragma linkwith "SDL"
 #pragma refcounting [1]
@@ -48,12 +51,15 @@ void drawArrayMulti( SDLdisplay &disp, color[.,.] array, int[.] pos)
   drawArrayOffset( disp, array, (shape( array)+3) * pos);
 }
 
-external void drawArrayOffset( SDLdisplay &disp, color[.,.] array, int[2] pic_offset);
+external void drawArrayOffset( SDLdisplay &disp, 
+                               color[.,.] array, int[2] pic_offset);
+#pragma linkname "SAC_SDL_drawArrayOffset"
 #pragma linkobj "src/SDL/drawArrayOffset.o"
 #pragma linkwith "SDL"
 #pragma refcounting [1]
 
 external void drawPixel( SDLdisplay &disp, int[.] idx, color val);
+#pragma linkname "SAC_SDL_drawPixel"
 #pragma linkobj "src/SDL/drawPixel.o"
 #pragma linkwith "SDL"
 #pragma refcounting [1,2]
@@ -67,3 +73,11 @@ void drawArrayDynamic( SDLdisplay &disp, color[.,.] array)
   return();
 }
 #endif
+
+external int[2,2] getSelection( SDLdisplay &disp);
+#pragma linkname "SAC_SDL_getSelection"
+#pragma linkobj "src/SDL/getSelection.o"
+#pragma linkwith "SDL"
+#pragma refcounting[1]
+#pragma linksign [1,2]
+

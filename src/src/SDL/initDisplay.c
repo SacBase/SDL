@@ -14,7 +14,11 @@ SDL_sem *SDLsac_updatesem = NULL;
 SDL_Thread *SDLsac_updater = NULL;
 #endif /* UPDATE_VIA_SEMAPHORE */
 
-bool SDLsac_isasync;
+bool SDLsac_isasync = 0;
+
+selmode_t SDLsac_selmode = SEL_none;
+SDL_sem *SDLsac_selectsem = NULL;
+int SDLsac_selection[4] = {0,0,0,0};
 
 static
 int UpdateScreen( void *surface)
@@ -77,6 +81,24 @@ int EventHandler( void *data)
           done = 1;
           break;
 
+        case SDL_MOUSEBUTTONDOWN:
+          if ((event.button.button == 1) && (SDLsac_selmode == SEL_top)) {
+            SDLsac_selmode = SEL_bottom;
+            SDLsac_selection[0] = event.button.x;
+            SDLsac_selection[1] = event.button.y;
+          }
+          break;
+
+        case SDL_MOUSEBUTTONUP:
+          if ((event.button.button == 1) && (SDLsac_selmode == SEL_bottom)) {
+            SDLsac_selmode = SEL_none;
+            SDLsac_selection[2] = event.button.x;
+            SDLsac_selection[3] = event.button.y;
+
+            SDL_SemPost( SDLsac_selectsem);
+          }
+          break;
+
         default:
           break;
       }
@@ -123,9 +145,9 @@ Uint32 TimerHandler(Uint32 interval, void *param) {
 }
 
 
-void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
-                  SAC_ND_PARAM_in( shp_nt, int),
-                  SAC_ND_PARAM_in( async_nt, bool))
+void SAC_SDL_initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
+                          SAC_ND_PARAM_in( shp_nt, int),
+                          SAC_ND_PARAM_in( async_nt, bool))
 {
   SAC_ND_DECL__DATA( disp_nt, Display, )
 
@@ -142,7 +164,8 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
     SAC_RuntimeError( "Failed to init SDL Display: %s", SDL_GetError());
   }
 
-  SDL_WM_SetCaption( "SaC SDL Output", NULL);
+  SDL_WM_SetCaption( SDL_SAC_DEFAULT_HEADING, NULL);
+  SDL_ShowCursor( SDL_DISABLE);
 
   SDLsac_isasync = SAC_ND_A_FIELD( async_nt);
 
@@ -150,6 +173,14 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
    * a shiny mutex 
    */
   SDLsac_mutex = SDL_CreateMutex();
+
+  /*
+   * semaphore for selection mode
+   */
+  SDLsac_selectsem = SDL_CreateSemaphore( 0);
+  if (SDLsac_selectsem == NULL) {
+    SAC_RuntimeError( "Failed to init selection semaphore");
+  }
 
   if( SDLsac_isasync) {
 #ifdef UPDATE_VIA_SEMAPHORE

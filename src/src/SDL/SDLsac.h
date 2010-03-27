@@ -21,16 +21,23 @@ extern SDL_Thread *SDLsac_updater;
 
 extern bool SDLsac_isasync;
 
+typedef enum {SEL_none, SEL_top, SEL_bottom} selmode_t;
+extern selmode_t SDLsac_selmode;
+extern SDL_sem *SDLsac_selectsem;
+extern int SDLsac_selection[4];
+
+#define SDL_SAC_DEFAULT_HEADING "SaC SDL Display"
+#define SDL_SAC_SELECT_HEADING "Please click and drag to select an area..."
+
 #define SDL_USEREVENT_DRAW (SDL_USEREVENT + 1)
 #define SDL_USEREVENT_QUIT (SDL_USEREVENT + 2)
 
-#define disp_nt (disp, T_OLD((SCL, (HID, (NUQ,)))))
-#define disp_nt (disp, T_OLD((SCL, (HID, (NUQ,)))))
-#define shp_nt  (shp, T_OLD((AKD, (NHD, (NUQ,)))))
-#define ar_nt   (ar, T_OLD((AKD, (NHD, (NUQ,)))))
-#define color_nt (col, T_OLD((AKS, (NHD, (NUQ,)))))
-#define scalar_nt (scl, T_OLD((SCL, (NHD, (NUQ,)))))
-#define scalres_nt (sclres, T_OLD((SCL, (NHD, (NUQ,)))))
-#define async_nt (async, T_OLD((SCL, (NHD, (NUQ,)))))
+#define disp_nt       (disp, T_OLD((SCL, (HID, (NUQ,)))))
+#define shp_nt        (shp, T_OLD((AKD, (NHD, (NUQ,)))))
+#define ar_nt         (ar, T_OLD((AKD, (NHD, (NUQ,)))))
+#define color_nt      (col, T_OLD((AKS, (NHD, (NUQ,)))))
+#define async_nt      (async, T_OLD((SCL, (NHD, (NUQ,)))))
+#define select_out_nt (sel_out, T_OLD((AKS, (NHD, (NUQ,)))))
+#define select_nt     (sel, T_OLD((AKS, (NHD, (NUQ,)))))
 
 #endif

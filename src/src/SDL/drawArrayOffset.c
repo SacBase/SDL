@@ -1,13 +1,12 @@
 #include "SDLsac.h"
 
 #include <unistd.h>
-/*#include <stdio.h>*/
 
-void drawArrayOffset( 
-            SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
-            SAC_ND_PARAM_in( ar_nt, int),
-            int pic_offset[2]
-            )
+void SAC_SDL_drawArrayOffset( 
+       SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
+       SAC_ND_PARAM_in( ar_nt, int),
+       int pic_offset[2]
+     )
 {
   int xaxis, yaxis, aroffset, screenoffset, xoffset, yoffset;
 
@@ -52,8 +51,6 @@ void drawArrayOffset(
   /*
    * draw
    */
-  /*printf("xoffset = %i, yoffset = %i\n", xoffset, yoffset);*/
-
   aroffset = 0;
   for (yaxis = yoffset; 
        yaxis < SAC_ND_A_DESC_SHAPE( ar_nt, 0)+yoffset; yaxis ++) {
