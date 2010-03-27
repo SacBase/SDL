@@ -5,13 +5,19 @@
 #include "SDL.h"
 #include "SDL_thread.h"
 
+#undef UPDATE_VIA_SEMAPHORE
+#define ADAPTIVE_MODE
+
 typedef SDL_Surface* Display;
 
 extern SDL_Thread *SDLsac_eventhandler;
 extern SDL_mutex *SDLsac_mutex;
 extern SDL_TimerID SDLsac_timer;
+
+#ifdef UPDATE_VIA_SEMAPHORE
 extern SDL_sem *SDLsac_updatesem;
 extern SDL_Thread *SDLsac_updater;
+#endif /* UPDATE_VIA_SEMAPHORE */
 
 extern bool SDLsac_isasync;
 

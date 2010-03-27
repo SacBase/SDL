@@ -24,11 +24,13 @@ void destroyDisplay( SAC_ND_PARAM_in_nodesc( disp_nt, Display))
       SDL_WaitThread( SDLsac_eventhandler, NULL);
     }
 
+#ifdef UPDATE_VIA_SEMAPHORE
     /* kill the updater */
     SDL_KillThread( SDLsac_updater);
 
     /* destroy the semaphore */
     SDL_DestroySemaphore( SDLsac_updatesem);
+#endif
   }
 
   /* finally, we can release this */

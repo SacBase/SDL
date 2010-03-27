@@ -2,26 +2,31 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define ADAPTIVE_MODE
 #define MIN_UPDATE_INTERVAL 50
-#define START_UPDATE_INTERVAL 250
+#define START_UPDATE_INTERVAL 200
 
 SDL_Thread *SDLsac_eventhandler = NULL;
 SDL_mutex *SDLsac_mutex = NULL;
 SDL_TimerID SDLsac_timer = NULL;
+
+#ifdef UPDATE_VIA_SEMAPHORE
 SDL_sem *SDLsac_updatesem = NULL;
 SDL_Thread *SDLsac_updater = NULL;
+#endif /* UPDATE_VIA_SEMAPHORE */
 
 bool SDLsac_isasync;
 
 static
 int UpdateScreen( void *surface)
 {
+#ifdef UPDATE_VIA_SEMAPHORE
   while (1) {
     /*
      * wait for update event 
      */
     if (SDL_SemWait( SDLsac_updatesem) == 0) {
+      
+#endif /* UPDATE_VIA_SEMAPHORE */
       /*
        * accessing the display needs to be mutually exclusive
        */
@@ -37,8 +42,12 @@ int UpdateScreen( void *surface)
       if (SDL_mutexV( SDLsac_mutex)==-1){
         SAC_RuntimeError( "Failed to unlock the access mutex");
       }
+#ifdef UPDATE_VIA_SEMAPHORE
     }
   }
+#endif /* UPDATE_VIA_SEMAPHORE */
+
+  return 0;
 }
 
 static 
@@ -57,10 +66,11 @@ int EventHandler( void *data)
           break;
 
         case SDL_USEREVENT_DRAW:
-          /*
-          updateScreen( (SDL_Surface *) event.user.data1);
-          */
+#ifdef UPDATE_VIA_SEMAPHORE
           SDL_SemPost( SDLsac_updatesem);
+#else /* UPDATE_VIA_SEMAPHORE */
+          UpdateScreen( (SDL_Surface *) event.user.data1);
+#endif /* UPDATE_VIA_SEMAPHORE */
           break;
 
         case SDL_USEREVENT_QUIT:
@@ -84,10 +94,14 @@ Uint32 TimerHandler(Uint32 interval, void *param) {
 #endif
 
 #ifdef ADAPTIVE_MODE
+#ifdef UPDATE_VIA_SEMAPHORE
+  eventqueue = SDL_SemValue( SDLsac_updatesem);
+#else /* UPDATE_VIA_SEMAPHORE */
   eventqueue = SDL_PeepEvents( &event, 
                                1, 
                                SDL_PEEKEVENT, 
                                SDL_EVENTMASK( SDL_USEREVENT_DRAW));
+#endif /* UPDATE_VIA_SEMAPHORE */
 
   if (eventqueue == 1) {
     /* an event overtook us, so we are too fast */
@@ -122,7 +136,7 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
   SAC_ND_A_FIELD( disp_nt) = 
     SDL_SetVideoMode( SAC_ND_A_FIELD( shp_nt)[1], 
                       SAC_ND_A_FIELD( shp_nt)[0], 
-                      32, SDL_HWSURFACE | SDL_ASYNCBLIT );
+                      32, SDL_SWSURFACE);
 
   if (SAC_ND_A_FIELD( disp_nt) == NULL) {
     SAC_RuntimeError( "Failed to init SDL Display: %s", SDL_GetError());
@@ -138,6 +152,7 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
   SDLsac_mutex = SDL_CreateMutex();
 
   if( SDLsac_isasync) {
+#ifdef UPDATE_VIA_SEMAPHORE
     /*
      * create a semaphore
      */
@@ -150,6 +165,7 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
      * create the update thread
      */
     SDLsac_updater = SDL_CreateThread( UpdateScreen, SAC_ND_A_FIELD( disp_nt));
+#endif /* UPDATE_VIA_SEMAPHORE */
   
     /*
      * register an event handler 
