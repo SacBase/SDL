@@ -3,7 +3,7 @@ class SDLdisplay;
 external classtype;
 
 use Color8: all;
-use Array: {*,+,-};
+use Array: {*,+,-,/,!=,modarray,all};
 
 provide all;
 
@@ -12,7 +12,7 @@ SDLdisplay initDisplay( int[.] shp)
   return( initDisplay( shp, true));
 }
 
-SDLdisplay initMultiDisplay( int[.] layout, int[.] disp_shp)
+SDLdisplay initMultiDisplay( int[2] layout, int[2] disp_shp)
 {
   size = layout * disp_shp + (layout-1)*3;
 
@@ -27,7 +27,7 @@ SDLdisplay initMultiDisplay( int[.] layout, int[.] disp_shp)
   return( res);
 }
 
-external SDLdisplay initDisplay( int[.] shp, bool async);
+external SDLdisplay initDisplay( int[2] shp, bool async);
 #pragma linkname "SAC_SDL_initDisplay"
 #pragma linkobj "src/SDL/initDisplay.o"
 #pragma linkwith "SDL"
@@ -40,13 +40,19 @@ external void destroyDisplay( SDLdisplay disp);
 #pragma effect World::TheWorld
 #pragma linkwith "SDL"
 
+external int[2] getExtent( SDLdisplay &disp);
+#pragma linkname "SAC_SDL_getExtent"
+#pragma linkobj "src/SDL/getExtent.o"
+#pragma linkwith "SDL"
+#pragma linksign  [1,2]
+
 external void drawArray( SDLdisplay &disp, color[.,.] array);
 #pragma linkname "SAC_SDL_drawArray"
 #pragma linkobj "src/SDL/drawArray.o"
 #pragma linkwith "SDL"
 #pragma refcounting [1]
 
-void drawArrayMulti( SDLdisplay &disp, color[.,.] array, int[.] pos)
+void drawArrayMulti( SDLdisplay &disp, color[.,.] array, int[2] pos)
 {
   drawArrayOffset( disp, array, (shape( array)+3) * pos);
 }
@@ -58,7 +64,7 @@ external void drawArrayOffset( SDLdisplay &disp,
 #pragma linkwith "SDL"
 #pragma refcounting [1]
 
-external void drawPixel( SDLdisplay &disp, int[.] idx, color val);
+external void drawPixel( SDLdisplay &disp, int[2] idx, color val);
 #pragma linkname "SAC_SDL_drawPixel"
 #pragma linkobj "src/SDL/drawPixel.o"
 #pragma linkwith "SDL"
@@ -78,6 +84,27 @@ external int[2,2] getSelection( SDLdisplay &disp);
 #pragma linkname "SAC_SDL_getSelection"
 #pragma linkobj "src/SDL/getSelection.o"
 #pragma linkwith "SDL"
-#pragma refcounting[1]
 #pragma linksign [1,2]
 
+int[2], int[2,2] getSelectionMulti( SDLdisplay &disp, int[2] layout)
+{
+  selection = getSelection( disp);
+  extent = getExtent( disp);
+  shape = (extent - 3 * (layout - 1)) / layout;
+
+  StdIO::print(selection);
+  StdIO::print(extent);
+  StdIO::print(shape);
+
+  field = { [i] -> selection[[i]] / (shape + 3)};
+
+  StdIO::print( field);
+  pos = { [i] -> selection[[i]] - 3 * field[[i]] - field[[i]] * shape};
+  StdIO::print(pos);
+
+  if (all( field[[0]] != field[[1]])) {
+    pos[[1]] = shape - 1;
+  } 
+
+  return( field[[0]], pos);
+}
