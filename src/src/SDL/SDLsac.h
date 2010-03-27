@@ -27,7 +27,7 @@ extern SDL_sem *SDLsac_selectsem;
 extern int SDLsac_selection[4];
 
 #define SDL_SAC_DEFAULT_HEADING "SaC SDL Display"
-#define SDL_SAC_SELECT_HEADING "Please click and drag to select an area..."
+#define SDL_SAC_SELECT_HEADING "Click and drag to select an area, button-two click to cancel..."
 
 #define SDL_USEREVENT_DRAW (SDL_USEREVENT + 1)
 #define SDL_USEREVENT_QUIT (SDL_USEREVENT + 2)

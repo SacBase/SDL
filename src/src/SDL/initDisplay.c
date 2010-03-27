@@ -54,8 +54,72 @@ int UpdateScreen( void *surface)
   return 0;
 }
 
+static
+void InvertRect( Display disp, int *pos)
+{
+  int yaxis, xaxis;
+  int x1, x2, y1, y2;
+  int screenoffset;
+
+  if (pos[0] < pos[2]) {
+    x1 = pos[0];
+    x2 = pos[2];
+  } else {
+    x1 = pos[2];
+    x2 = pos[0];
+  }
+
+  if (pos[1] < pos[3]) {
+    y1 = pos[1];
+    y2 = pos[3];
+  } else {
+    y1 = pos[3];
+    y2 = pos[1];
+  }
+
+  /*
+   * accessing the display needs to be mutually exclusive
+   */
+  if (SDL_mutexP( SDLsac_mutex)==-1){
+    SAC_RuntimeError( "Failed to lock the access mutex");
+  }
+
+  /*
+   * lock the screen for drawing
+   */
+  if (SDL_MUSTLOCK( NT_NAME( disp_nt))) {
+    if (SDL_LockSurface( NT_NAME( disp_nt)) < 0) {
+      SAC_RuntimeError( "Failed to lock the SDL Display");
+    }
+  }
+
+  for (yaxis = y1; yaxis < y2; yaxis ++) {
+    screenoffset = yaxis * disp->pitch / 4;
+    for (xaxis = x1; xaxis < x2 ; xaxis ++) {
+      Uint32 *bptr = (Uint32 *) disp->pixels 
+        + screenoffset + xaxis;
+
+      *bptr = ~(*bptr);
+    }
+  }
+
+  /*
+   * unlock it
+   */
+  if (SDL_MUSTLOCK( NT_NAME( disp_nt))) {
+    SDL_UnlockSurface( NT_NAME( disp_nt));
+  }
+
+  /*
+   * accessing the display needs to be mutually exclusive
+   */
+  if (SDL_mutexV( SDLsac_mutex)==-1){
+    SAC_RuntimeError( "Failed to unlock the access mutex");
+  }
+}
+
 static 
-int EventHandler( void *data)
+int EventHandler( void *screen)
 {
   SDL_Event event;
   int done = 0;
@@ -86,6 +150,8 @@ int EventHandler( void *data)
             SDLsac_selmode = SEL_bottom;
             SDLsac_selection[0] = event.button.x;
             SDLsac_selection[1] = event.button.y;
+            SDLsac_selection[2] = event.button.x;
+            SDLsac_selection[3] = event.button.y;
           }
           break;
 
@@ -96,6 +162,26 @@ int EventHandler( void *data)
             SDLsac_selection[3] = event.button.y;
 
             SDL_SemPost( SDLsac_selectsem);
+          }
+          if ((event.button.button == 2) && (SDLsac_selmode != SEL_none)) {
+            SDLsac_selmode = SEL_none;
+            SDLsac_selection[0] = -1;
+            SDLsac_selection[1] = -1;
+            SDLsac_selection[2] = -1;
+            SDLsac_selection[3] = -1;
+
+            SDL_SemPost( SDLsac_selectsem);
+          }
+          break;
+
+        case SDL_MOUSEMOTION:
+          if (SDLsac_selmode == SEL_bottom) {
+            InvertRect( (Display) screen, SDLsac_selection);
+
+            SDLsac_selection[2] = event.motion.x;
+            SDLsac_selection[3] = event.motion.y;
+
+            InvertRect( (Display) screen, SDLsac_selection);
           }
           break;
 
@@ -201,7 +287,8 @@ void SAC_SDL_initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
     /*
      * register an event handler 
      */ 
-    SDLsac_eventhandler = SDL_CreateThread( EventHandler, NULL);
+    SDLsac_eventhandler = SDL_CreateThread( EventHandler, 
+                                            SAC_ND_A_FIELD( disp_nt));
 
     /*
      * start a display update timer 
