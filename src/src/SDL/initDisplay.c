@@ -10,26 +10,34 @@ SDL_Thread *SDLsac_eventhandler = NULL;
 SDL_mutex *SDLsac_mutex = NULL;
 SDL_TimerID SDLsac_timer = NULL;
 SDL_sem *SDLsac_updatesem = NULL;
+SDL_Thread *SDLsac_updater = NULL;
 
 bool SDLsac_isasync;
 
 static
-void updateScreen( SDL_Surface  *surface)
+int UpdateScreen( void *surface)
 {
-  /*
-   * accessing the display needs to be mutually exclusive
-   */
-  if (SDL_mutexP( SDLsac_mutex)==-1){
-    SAC_RuntimeError( "Failed to lock the access mutex");
-  }
+  while (1) {
+    /*
+     * wait for update event 
+     */
+    if (SDL_SemWait( SDLsac_updatesem) == 0) {
+      /*
+       * accessing the display needs to be mutually exclusive
+       */
+      if (SDL_mutexP( SDLsac_mutex)==-1){
+        SAC_RuntimeError( "Failed to lock the access mutex");
+      }
 
-  SDL_Flip( surface);
+      SDL_Flip( (SDL_Surface *) surface);
 
-  /*
-   * accessing the display needs to be mutually exclusive
-   */
-  if (SDL_mutexV( SDLsac_mutex)==-1){
-    SAC_RuntimeError( "Failed to unlock the access mutex");
+      /*
+       * accessing the display needs to be mutually exclusive
+       */
+      if (SDL_mutexV( SDLsac_mutex)==-1){
+        SAC_RuntimeError( "Failed to unlock the access mutex");
+      }
+    }
   }
 }
 
@@ -49,7 +57,10 @@ int EventHandler( void *data)
           break;
 
         case SDL_USEREVENT_DRAW:
+          /*
           updateScreen( (SDL_Surface *) event.user.data1);
+          */
+          SDL_SemPost( SDLsac_updatesem);
           break;
 
         case SDL_USEREVENT_QUIT:
@@ -128,10 +139,23 @@ void initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
 
   if( SDLsac_isasync) {
     /*
+     * create a semaphore
+     */
+    SDLsac_updatesem = SDL_CreateSemaphore( 0);
+    if (SDLsac_updatesem == NULL) {
+      SAC_RuntimeError( "Failed to init update semaphore");
+    }
+
+    /*
+     * create the update thread
+     */
+    SDLsac_updater = SDL_CreateThread( UpdateScreen, SAC_ND_A_FIELD( disp_nt));
+  
+    /*
      * register an event handler 
      */ 
     SDLsac_eventhandler = SDL_CreateThread( EventHandler, NULL);
-  
+
     /*
      * start a display update timer 
      */

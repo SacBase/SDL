@@ -10,6 +10,8 @@ typedef SDL_Surface* Display;
 extern SDL_Thread *SDLsac_eventhandler;
 extern SDL_mutex *SDLsac_mutex;
 extern SDL_TimerID SDLsac_timer;
+extern SDL_sem *SDLsac_updatesem;
+extern SDL_Thread *SDLsac_updater;
 
 extern bool SDLsac_isasync;
 
