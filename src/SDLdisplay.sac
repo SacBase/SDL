@@ -92,15 +92,8 @@ int[2], int[2,2] getSelectionMulti( SDLdisplay &disp, int[2] layout)
   extent = getExtent( disp);
   shape = (extent - 3 * (layout - 1)) / layout;
 
-  StdIO::print(selection);
-  StdIO::print(extent);
-  StdIO::print(shape);
-
   field = { [i] -> selection[[i]] / (shape + 3)};
-
-  StdIO::print( field);
   pos = { [i] -> selection[[i]] - 3 * field[[i]] - field[[i]] * shape};
-  StdIO::print(pos);
 
   if (all( field[[0]] != field[[1]])) {
     pos[[1]] = shape - 1;
