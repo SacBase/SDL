@@ -2,7 +2,7 @@ class SDLdisplay;
 
 external classtype;
 
-use Color8: all;
+use Color8: all except {modarray} ;
 use Array: {*,+,-,/,!=,modarray,all};
 
 provide all;
