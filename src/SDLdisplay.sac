@@ -2,8 +2,8 @@ class SDLdisplay;
 
 external classtype;
 
-use Color8: all except {modarray} ;
-use Array: {*,+,-,/,!=,modarray,all};
+import Color8: all except {modarray} ;
+import Array: {*,+,-,/,!=,modarray,all};
 
 provide all;
 
