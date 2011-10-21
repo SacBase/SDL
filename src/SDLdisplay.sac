@@ -2,10 +2,9 @@ class SDLdisplay;
 
 external classtype;
 
-import Color8: all except {modarray} ;
-import Array: {*,+,-,/,!=,modarray,all};
+use Structures: all;
 
-provide all;
+export all;
 
 SDLdisplay initDisplay( int[.] shp)
 {
