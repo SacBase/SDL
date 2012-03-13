@@ -9,7 +9,12 @@ void SAC_SDL2_close( SDL2* disp)
 
   SAC_SDL2_lock( disp);
 
-  SAC_SDL2_stop( disp);
+  if (SDL2_ISROOT( disp)) {
+    SAC_SDL2_stop( disp);
+  }
+  else {
+    SAC_SDL2_unlock( disp);
+  }
 
   SAC_SDL2_free_disp( disp);
 }

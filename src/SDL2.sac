@@ -38,6 +38,8 @@ external SDL2 initDisplay( int[2] shp);
     /*
      * Open a new display window on screen.
      * The parameter 'shp' gives the Width/Height dimensions.
+     * When width or height is zero then SDL will allocate
+     * the maximum screen size for that dimension.
      */
 
 inline SDL2 initDisplay( int[2] shp, bool async)
@@ -70,13 +72,14 @@ SDL2 initMultiDisplay( int[2] layout, int[2] disp_shp)
 external void resizeDisplay( SDL2& disp, int[2] shp);
     #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_resize"
-    #pragma linkobj  "src/SDL2/display.o"
+    #pragma linkobj  "src/SDL2/resize.o"
     #pragma refcounting [1]
     /*
      * Resize an existing display window on screen.
      * The parameter 'shp' gives the desired Width/Height dimensions.
-     * Beware that this may cause problems for sub-windows of 'disp'
-     * when they are no longer contained in the new area of 'disp'.
+     * Beware that resizing to smaller dimensions may cause problems
+     * for sub-windows of 'disp' when they are no longer contained
+     * in the new area of 'disp'.
      */
 
 external void destroyDisplay( SDL2& disp);
@@ -84,7 +87,7 @@ external void destroyDisplay( SDL2& disp);
     #pragma linkname "SAC_SDL2_close"
     #pragma linkobj  "src/SDL2/close.o"
     /*
-     * Close an existing display window and free all resources.
+     * Close an existing display window and free associated resources.
      */
 
 external SDL2 window( SDL2& disp, int[2] offset, int[2] size);

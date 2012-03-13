@@ -21,8 +21,6 @@ void SAC_SDL2_enable_noframe( int enable);
 void SAC_SDL2_create_display_event( SDL_Event* event);
 void SAC_SDL2_display( SDL2** disp_ptr,
                        SAC_ND_PARAM_in( shp_nt, int));
-void SAC_SDL2_resize( SDL2* disp,
-                      SAC_ND_PARAM_in( shp_nt, int));
 
 /* draw.c */
 
@@ -64,6 +62,11 @@ const char* SAC_SDL2_event_name(int evno);
 /* pixel.c */
 
 void SAC_SDL2_pixel( SDL2* disp, SAC_ND_PARAM_in( shp_nt, int), SAC_ND_PARAM_in( color_nt, int));
+
+/* resize.c */
+
+void SAC_SDL2_resize( SDL2* disp,
+                      SAC_ND_PARAM_in( shp_nt, int));
 
 /* select.c */
 
