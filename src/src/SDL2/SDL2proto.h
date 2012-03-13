@@ -7,7 +7,8 @@ void SAC_SDL2_close( SDL2* disp);
 
 /* data.c */
 
-SDL2* SAC_SDL2_alloc_disp(void);
+SDL2* SAC_SDL2_alloc_disp( int width, int height);
+SDL2* SAC_SDL2_copy_disp( SDL2* parent, int x, int y, int w, int h);
 void SAC_SDL2_free_disp( SDL2* disp);
 SDL2* SAC_SDL2_null( void);
 int SAC_SDL2_isnull( SDL2* disp);
@@ -45,8 +46,8 @@ void SAC_SDL2_stop( SDL2* disp);
 
 /* invert.c */
 
-void SAC_SDL2_invert_rect( SDL2* disp, int *pos, int update);
-void SAC_SDL2_invert2( SDL2* disp, int offsets[2], int sizes[2]);
+void SAC_SDL2_invert_rect( SDL2* disp, const int *pos, const int update);
+void SAC_SDL2_invert2( SDL2* disp, const int offsets[2], const int sizes[2]);
 
 /* mouse.c */
 
@@ -96,9 +97,17 @@ void SAC_SDL2_cursor( int enable);
 /* update.c */
 
 void SAC_SDL2_update_display_event( SDL_Event* event);
+
+/*
+ * Receive coordinates in true surface area.
+ */
 void SAC_SDL2_update_rect( SDL2* disp, int x, int y, int w, int h, int async);
 void SAC_SDL2_update( SDL2* disp, int async);
 void SAC_SDL2_update2( SDL2* disp, int offsets[2], int sizes[2], int async);
+
+/* window.c */
+
+SDL2* SAC_SDL2_window( SDL2* disp, int offsets[2], int sizes[2]);
 
 
 #endif

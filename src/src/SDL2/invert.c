@@ -1,20 +1,20 @@
 #include "SDL2sac.h"
 
-void SAC_SDL2_invert_rect( SDL2* disp, int *pos, int update)
+void SAC_SDL2_invert_rect( SDL2* disp, const int *pos, const int update)
 {
-  int     y, x;
-  int     x1, x2, y1, y2;
-  int     screenoffset;
-  Uint32* bptr;
+  const int pitch = SDL2_PITCH( disp) / BYTES_PER_PIXEL;
+  Uint32*   videomem = (Uint32 *) SDL2_PIXELS( disp);
+  int       y, x;
+  int       x1, x2, y1, y2;
+  Uint32*   bptr;
 
-  x1 = (pos[0] < pos[2]) ? pos[0] : pos[2];
-  x2 = (pos[0] < pos[2]) ? pos[2] : pos[0];
-  y1 = (pos[1] < pos[3]) ? pos[1] : pos[3];
-  y2 = (pos[1] < pos[3]) ? pos[3] : pos[1];
+  x1 = MIN(pos[0], pos[2]);
+  x2 = MAX(pos[0], pos[2]);
+  y1 = MIN(pos[1], pos[3]);
+  y2 = MAX(pos[1], pos[3]);
 
   for (y = y1; y <= y2; ++y) {
-    screenoffset = y * SDL2_PITCH( disp) / 4;
-    bptr = (Uint32 *) SDL2_PIXELS( disp) + screenoffset + x1;
+    bptr = videomem + x1 + y * pitch;
     for (x = x1; x <= x2 ; ++x, ++bptr) {
       *bptr = (0xFFFFFF & ~(*bptr));
     }
@@ -25,40 +25,39 @@ void SAC_SDL2_invert_rect( SDL2* disp, int *pos, int update)
   }
 }
 
-void SAC_SDL2_invert2( SDL2* disp, int offsets[2], int sizes[2])
+void SAC_SDL2_invert2( SDL2* disp, const int offsets[2], const int sizes[2])
 {
   const int width = sizes[1];
   const int height = sizes[0];
   const int xoffset = offsets[1];
   const int yoffset = offsets[0];
-  const int dont_update = 0;
 
   SAC_SDL2_check( disp);
   if (SDL2_DEBUG( disp)) {
     printf("%sSAC_SDL2_invert2: [%d,%d]:[%d,%d] on [%d,%d]\n",
             When( disp), xoffset, yoffset, width, height,
-            SDL2_WIDTH( disp), SDL2_HEIGHT( disp));
+            SDL2_DISP_WIDTH( disp), SDL2_DISP_HEIGHT( disp));
   }
 
   SAC_SDL2_lock( disp);
 
   if ( xoffset < 0 || yoffset < 0 ||
-       xoffset + width  > SDL2_WIDTH(disp) ||
-       yoffset + height > SDL2_HEIGHT(disp))
+       xoffset + width  > SDL2_DISP_WIDTH( disp) ||
+       yoffset + height > SDL2_DISP_HEIGHT( disp))
   {
     SAC_RuntimeError( "SAC_SDL2_invert2: Offset [%d,%d] + array [%d,%d] "
                       "exceeds display [%d,%d]\n",
                       xoffset, yoffset, width, height,
-                      SDL2_WIDTH(disp), SDL2_HEIGHT(disp));
+                      SDL2_DISP_WIDTH( disp), SDL2_DISP_HEIGHT( disp));
   }
   else {
     int pos[4];
-    pos[0] = xoffset;
-    pos[1] = yoffset;
-    pos[2] = xoffset + width - 1;
-    pos[3] = yoffset + height - 1;
-    SAC_SDL2_invert_rect( disp, pos, dont_update);
-    SAC_SDL2_update_rect( disp, xoffset, yoffset, width, height, FALSE);
+    pos[0] = xoffset + SDL2_DISP_X( disp);
+    pos[1] = yoffset + SDL2_DISP_Y( disp);
+    pos[2] = pos[0] + width - 1;
+    pos[3] = pos[1] + height - 1;
+    SAC_SDL2_invert_rect( disp, pos, FALSE);
+    SAC_SDL2_update_rect( disp, pos[0], pos[1], width, height, FALSE);
   }
 
   SAC_SDL2_unlock( disp);

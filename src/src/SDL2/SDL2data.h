@@ -23,8 +23,10 @@
 
 /* Simple DirectMedia Layer */
 
-#define DEFAULT_BPP     32
-#define DEFAULT_VID_MOD (SDL_SWSURFACE)
+#define BITS_PER_PIXEL         32
+#define BYTES_PER_PIXEL        4
+#define DEFAULT_VID_MOD        (SDL_SWSURFACE)
+#define RGB(r,g,b)             ((Uint32)(r)<<16)|((Uint32)(g)<<8)|((Uint32)(b))
 
 /* SDL gives USEREVENT+0 to USEREVENT+7 for users to define: */
 #define SDL2_CREATE_EVENT       (SDL_USEREVENT + 1)
@@ -40,35 +42,39 @@ typedef struct SDL2 SDL2;
 struct SDL2 {
   unsigned int magic;
   unsigned int debug;
-  unsigned int locked;
   sem_t*       lock;
   sem_t*       sem;
   SDL_Surface* surf;
+  SDL2*        parent;
+  SDL2*        root;
+  int          x;
+  int          y;
+  int          width;
+  int          height;
 };
 
-#define SDL2_CHECK(s)     (SDL2_MAGIC(s) == SDL2_MAGIC_NUMBER)
-#define SDL2_MAGIC(s)     ((s)->magic)
-#define SDL2_DEBUG(s)     ((s)->debug)
-#define SDL2_LOCK(s)      ((s)->lock)
-#define SDL2_LOCKED(s)    ((s)->locked)
-#define SDL2_SEM(s)       ((s)->sem)
-#define SDL2_SURF(s)      ((s)->surf)
-#define SDL2_WIDTH(s)     ((s)->surf->w)
-#define SDL2_HEIGHT(s)    ((s)->surf->h)
-#define SDL2_PITCH(s)     ((s)->surf->pitch)
-#define SDL2_PIXELS(s)    ((s)->surf->pixels)
+#define SDL2_CHECK(s)        (SDL2_MAGIC(s) == SDL2_MAGIC_NUMBER)
+#define SDL2_MAGIC(s)        ((s)->magic)
+#define SDL2_DEBUG(s)        ((s)->debug)
+#define SDL2_LOCK(s)         ((s)->lock)
+#define SDL2_SEM(s)          ((s)->sem)
+#define SDL2_SURF(s)         ((s)->surf)
+#define SDL2_SURF_WIDTH(s)   ((s)->surf->w)
+#define SDL2_SURF_HEIGHT(s)  ((s)->surf->h)
+#define SDL2_PITCH(s)        ((s)->surf->pitch)
+#define SDL2_PIXELS(s)       ((s)->surf->pixels)
+#define SDL2_PARENT(s)       ((s)->parent)
+#define SDL2_ROOT(s)         ((s)->root)
+#define SDL2_DISP_X(s)       ((s)->x)
+#define SDL2_DISP_Y(s)       ((s)->y)
+#define SDL2_DISP_WIDTH(s)   ((s)->width)
+#define SDL2_DISP_HEIGHT(s)  ((s)->height)
 
-/* SDL2 user events */
 
-enum SDL2_user_code {
-  SDL2_CREATE_DISPLAY = 1,
-  SDL2_UPDATE_DISPLAY,
-  SDL2_TEARDOWN,
-};
-
-/* Window manager frame title */
+/* Window manager frame titles */
 
 #define SAC_SDL2_DEFAULT_HEADING "SaC SDL Display"
-#define SAC_SDL2_SELECT_HEADING "Click and drag to select an area, button-two click to cancel..."
+#define SAC_SDL2_SELECT_HEADING  "Click and drag to select an area, " \
+                                 "button-two click to cancel..."
 
 #endif

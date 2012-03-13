@@ -1,5 +1,12 @@
 class SDL2;
 
+/*
+ * This class implements a layer on top of the Simple DirectMedia Layer.
+ * It is backwards compatible with the 'SDLdisplay' SAC module.
+ * It adds features, is sometimes faster with pixel data
+ * and may generate less updates.
+ */
+
 external classtype;
 
 use Color8:      { color, white, black };
@@ -68,6 +75,8 @@ external void resizeDisplay( SDL2& disp, int[2] shp);
     /*
      * Resize an existing display window on screen.
      * The parameter 'shp' gives the desired Width/Height dimensions.
+     * Beware that this may cause problems for sub-windows of 'disp'
+     * when they are no longer contained in the new area of 'disp'.
      */
 
 external void destroyDisplay( SDL2& disp);
@@ -76,6 +85,18 @@ external void destroyDisplay( SDL2& disp);
     #pragma linkobj  "src/SDL2/close.o"
     /*
      * Close an existing display window and free all resources.
+     */
+
+external SDL2 window( SDL2& disp, int[2] offset, int[2] size);
+    #pragma linkname "SAC_SDL2_window"
+    #pragma linkobj  "src/SDL2/window.o"
+    #pragma linksign [0,1,2,3]
+    /*
+     * Create a sub-window of an existing display.
+     * This can be used to confine future draw operations to.
+     *   - The parameter 'offset' gives the X/Y position of the window.
+     *   - The parameter 'size' gives the Width/Height of the window.
+     * Offset must be non-negative and 'offset' + 'size' must fit in 'disp'.
      */
 
 external void drawArray( SDL2& disp, color[.,.] array);
@@ -95,22 +116,24 @@ void drawArrayMulti( SDL2& disp, color[.,.] array, int[2] pos)
 }
     /*
      * Copy an array to a given subsection of a multi-display.
+     * The parameter 'pos' selects the subsection in the multi-display.
      */
 
 external void drawArrayOffset( SDL2& disp, 
                                color[.,.] array, int[2] offset);
     #pragma linkname "SAC_SDL2_draw2"
     #pragma linkobj  "src/SDL2/draw.o"
-    #pragma linkwith "SDL"
     #pragma refcounting [1]
     /*
-     * Change the color value of a single pixel in the pixel buffer.
+     * Copy the array 'array' to a position on the display window 'disp'.
+     * The X/Y-offset are given by the parameter 'offset'.
+     * Offset must be non-negative and 'offset' + shape('array')
+     * must fit in the display window.
      */
 
 external int[2] getExtent( SDL2 &disp);
     #pragma linkname "SAC_SDL2_extent"
     #pragma linkobj  "src/SDL2/extent.o"
-    #pragma linkwith "SDL"
     #pragma linksign [1,2]
     /*
      * Request the Width/Height dimensions of a display window.
@@ -119,43 +142,44 @@ external int[2] getExtent( SDL2 &disp);
 external void drawPixel( SDL2 &disp, int[2] idx, color val);
     #pragma linkname "SAC_SDL2_pixel"
     #pragma linkobj  "src/SDL2/pixel.o"
-    #pragma linkwith "SDL"
     #pragma refcounting [1,2]
     /*
      * Change the color value of a single pixel in the pixel buffer.
+     * To update the pixel buffer to screen one of the update functions
+     * must be used. See below. It is best to draw a large number
+     * of pixels for one single call to update.
      */
 
 external void invertRect( SDL2& disp, int[2] offset, int[2] size);
     #pragma linkname "SAC_SDL2_invert2"
     #pragma linkobj  "src/SDL2/invert.o"
-    #pragma linkwith "SDL"
     #pragma linksign [1,2,3]
     /*
-     * Invert a rectangle on screen:
-     *   - offset gives the X/Y position
-     *   - size the Width/Height of the rectangle.
+     * Invert the colors of a rectangle on screen:
+     *   - The parameter 'offset' gives the X/Y position
+     *   - The parameter 'size' gives the Width/Height of the rectangle.
+     * Offset must be non-negative and 'offset' + 'size' must fit in 'disp'.
+     * A double invert restores the original image.
      */
 
 external void updateDisp( SDL2& disp, bool async);
     #pragma linkname "SAC_SDL2_update"
     #pragma linkobj  "src/SDL2/update.o"
-    #pragma linkwith "SDL"
     #pragma linksign [1,2]
     /*
      * Update the display window. This copies the pixel buffer to screen.
      * Use this function in combination with drawPixel.
-     *    - When async is false the function waits for completion.
-     *    - When async is true the function generates an update request
-     *      and immediately returns. Use with caution. Give the system
-     *      an appropriate amount of time to complete the request before
-     *      generating another update request. Note that this may interfere
-     *      with subsequent draw operations.
+     *  - When 'async' is false the function waits for the update to complete.
+     *  - When 'async' is true the function generates an update request
+     *    and immediately returns. Use with caution. Give the system
+     *    an appropriate amount of time to complete the request before
+     *    generating another update request. Note that subsequent draw
+     *    operations may also be shown by the asynchronous update.
      */
 
 external void updateRect( SDL2& disp, int[2] offset, int[2] size, bool async);
     #pragma linkname "SAC_SDL2_update2"
     #pragma linkobj  "src/SDL2/update.o"
-    #pragma linkwith "SDL"
     #pragma linksign [1,2,3,4]
     /*
      * Update a rectangle in the display window similar to updateDisp:
@@ -166,7 +190,6 @@ external void updateRect( SDL2& disp, int[2] offset, int[2] size, bool async);
 external int[2,2] getSelection( SDL2 &disp);
     #pragma linkname "SAC_SDL2_select"
     #pragma linkobj  "src/SDL2/select.o"
-    #pragma linkwith "SDL"
     #pragma linksign [1,2]
     /*
      * Ask the user to select an area in the display window using
@@ -199,8 +222,10 @@ external void fullscreen( bool enable);
     #pragma linkname "SAC_SDL2_enable_fullscreen"
     #pragma linkobj  "src/SDL2/display.o"
     /*
-     * Create display windows fullscreen. Please note
+     * Create future display windows fullscreen. Please note
      * that this may change the system X11 video mode.
+     * Give the user a mechanism to terminate the program gracefully
+     * or else the system may stay in an undesirable screen resolution.
      */
 
 external void noframe( bool enable);
@@ -208,7 +233,7 @@ external void noframe( bool enable);
     #pragma linkname "SAC_SDL2_enable_noframe"
     #pragma linkobj  "src/SDL2/display.o"
     /*
-     * Create display windows without a window manager frame.
+     * Create future display windows without a window manager frame.
      */
 
 external void cursor( bool enable);
@@ -226,6 +251,8 @@ external void heading( string heading);
     /*
      * Change the window manager frame header. This may trigger an old bug
      * in libX11 under certain circumstances and crash or deadlock.
+     * After creating a new display window let the window manager
+     * interact with it first before changing the 'heading'.
      * The function getSelection also uses this function.
      */
 

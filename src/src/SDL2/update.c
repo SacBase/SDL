@@ -15,6 +15,9 @@ void SAC_SDL2_update_display_event( SDL_Event* event)
   }
 }
 
+/*
+ * Receive coordinates in true surface area.
+ */
 void SAC_SDL2_update_rect( SDL2* disp, int x, int y, int w, int h, int async)
 {
   SDL_Event event;
@@ -53,8 +56,8 @@ void SAC_SDL2_update( SDL2* disp, int async)
   SAC_SDL2_check( disp);
   offsets[1] = 0;
   offsets[0] = 0;
-  sizes[1] = SDL2_WIDTH( disp);
-  sizes[0] = SDL2_HEIGHT( disp);
+  sizes[1] = SDL2_DISP_WIDTH( disp);
+  sizes[0] = SDL2_DISP_HEIGHT( disp);
   SAC_SDL2_update2( disp, offsets, sizes, async);
 }
 
@@ -69,22 +72,25 @@ void SAC_SDL2_update2( SDL2* disp, int offsets[2], int sizes[2], int async)
   if (SDL2_DEBUG( disp)) {
     printf("%sSAC_SDL2_update2: [%d,%d]:[%d,%d] on [%d,%d]\n",
             When( disp), xoffset, yoffset, width, height,
-            SDL2_WIDTH( disp), SDL2_HEIGHT( disp));
+            SDL2_DISP_WIDTH( disp), SDL2_DISP_HEIGHT( disp));
   }
 
   SAC_SDL2_lock( disp);
 
   if ( xoffset < 0 || yoffset < 0 ||
-       xoffset + width  > SDL2_WIDTH(disp) ||
-       yoffset + height > SDL2_HEIGHT(disp))
+       xoffset + width  > SDL2_DISP_WIDTH( disp) ||
+       yoffset + height > SDL2_DISP_HEIGHT( disp))
   {
     SAC_RuntimeError( "SAC_SDL2_update2: Offset [%d,%d] + array [%d,%d] "
                       "exceeds display [%d,%d]\n",
                       xoffset, yoffset, width, height,
-                      SDL2_WIDTH(disp), SDL2_HEIGHT(disp));
+                      SDL2_DISP_WIDTH( disp), SDL2_DISP_HEIGHT( disp));
   }
   else {
-    SAC_SDL2_update_rect( disp, xoffset, yoffset, width, height, async);
+    SAC_SDL2_update_rect( disp,
+                          SDL2_DISP_X( disp) + xoffset,
+                          SDL2_DISP_Y( disp) + yoffset,
+                          width, height, async);
   }
 
   SAC_SDL2_unlock( disp);

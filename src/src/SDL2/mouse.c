@@ -43,8 +43,7 @@ int SAC_SDL2_get_selection( int *sel)
 
 static void invert(void)
 {
-  const int update = 1;
-  SAC_SDL2_invert_rect( sel_disp, selection, update);
+  SAC_SDL2_invert_rect( sel_disp, selection, TRUE);
 }
 
 static int next_event_type(void)
@@ -73,8 +72,10 @@ void SAC_SDL2_mouse_down_event( SDL_Event* event)
   if ((event->button.button == 1) && (sel_mode == SelStart))
   {
     change_mode( SelDown);
-    LIMIT(event->button.x, 0, SDL2_WIDTH( sel_disp) - 1);
-    LIMIT(event->button.y, 0, SDL2_HEIGHT( sel_disp) - 1);
+    LIMIT(event->button.x, SDL2_DISP_X( sel_disp),
+          SDL2_DISP_X( sel_disp) + SDL2_DISP_WIDTH( sel_disp) - 1);
+    LIMIT(event->button.y, SDL2_DISP_Y( sel_disp),
+          SDL2_DISP_Y( sel_disp) + SDL2_DISP_HEIGHT( sel_disp) - 1);
     selection[0] = event->button.x;
     selection[1] = event->button.y;
     selection[2] = event->button.x;
@@ -95,8 +96,10 @@ void SAC_SDL2_mouse_up_event( SDL_Event* event)
   {
     invert();
     change_mode( SelDone);
-    LIMIT(event->button.x, 0, SDL2_WIDTH( sel_disp) - 1);
-    LIMIT(event->button.y, 0, SDL2_HEIGHT( sel_disp) - 1);
+    LIMIT(event->button.x, SDL2_DISP_X( sel_disp),
+          SDL2_DISP_X( sel_disp) + SDL2_DISP_WIDTH( sel_disp) - 1);
+    LIMIT(event->button.y, SDL2_DISP_Y( sel_disp),
+          SDL2_DISP_Y( sel_disp) + SDL2_DISP_HEIGHT( sel_disp) - 1);
     selection[2] = event->button.x;
     selection[3] = event->button.y;
     SAC_SDL2_post( sel_disp);
@@ -121,8 +124,10 @@ void SAC_SDL2_mouse_motion_event( SDL_Event* event)
              event->motion.x, event->motion.y, sel_mode);
     }
 
-    LIMIT(event->motion.x, 0, SDL2_WIDTH( sel_disp) - 1);
-    LIMIT(event->motion.y, 0, SDL2_HEIGHT( sel_disp) - 1);
+    LIMIT(event->button.x, SDL2_DISP_X( sel_disp),
+          SDL2_DISP_X( sel_disp) + SDL2_DISP_WIDTH( sel_disp) - 1);
+    LIMIT(event->button.y, SDL2_DISP_Y( sel_disp),
+          SDL2_DISP_Y( sel_disp) + SDL2_DISP_HEIGHT( sel_disp) - 1);
     if (event->motion.x != selection[2] || event->motion.y != selection[3])
     {
       invert();

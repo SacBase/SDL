@@ -74,7 +74,6 @@ void SAC_SDL2_lock( SDL2* disp)
     printf("%slock...\n", When( disp));
   }
   SAC_SDL2_sem_wait( sem);
-  SDL2_LOCKED( disp) = 1;
   if (SDL2_DEBUG( disp) >= 2) {
     printf("%slocked.\n", When( disp));
   }
@@ -87,7 +86,6 @@ void SAC_SDL2_unlock( SDL2* disp)
   if (SDL2_DEBUG( disp) >= 2) {
     printf("%sunlock\n", When( disp));
   }
-  SDL2_LOCKED( disp) = 0;
   SAC_SDL2_sem_post( sem);
 }
 

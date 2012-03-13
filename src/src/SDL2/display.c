@@ -21,7 +21,7 @@ void SAC_SDL2_create_display_event( SDL_Event* event)
   Uint32    flags = DEFAULT_VID_MOD | SAC_SDL2_fullscreen_flag |
                     SAC_SDL2_noframe_flag;
 
-  SDL2_SURF( disp) = SDL_SetVideoMode( rect->w, rect->h, DEFAULT_BPP, flags);
+  SDL2_SURF( disp) = SDL_SetVideoMode( rect->w, rect->h, BITS_PER_PIXEL, flags);
   if ( SDL2_SURF( disp) == NULL) {
     SAC_RuntimeError( "SAC_SDL2_display: failed SDL_SetVideoMode: %s",
                       SDL_GetError());
@@ -53,8 +53,7 @@ void SAC_SDL2_display( SDL2** disp_ptr,
                       width, height);
   }
   else {
-    disp = SAC_SDL2_alloc_disp();
-
+    disp = SAC_SDL2_alloc_disp( width, height);
     if ( SAC_SDL2_init( disp) == 0) {
       event.type = SDL2_CREATE_EVENT;
       rect.w = width;
@@ -64,7 +63,8 @@ void SAC_SDL2_display( SDL2** disp_ptr,
       SDL_PushEvent( &event);
       SAC_SDL2_wait( disp);
       SAC_SDL2_unlock( disp);
-    } else {
+    }
+    else {
       SAC_SDL2_free_disp( disp);
       disp = NULL;
     }
