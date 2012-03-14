@@ -58,7 +58,6 @@ static int do_event( SDL_Event* event, SDL2* disp)
       break;
 
     case SDL2_TEARDOWN_EVENT:
-      SAC_SDL2_teardown_event( event);
       done = 1;
       break;
 

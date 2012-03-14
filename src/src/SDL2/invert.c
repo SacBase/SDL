@@ -42,11 +42,12 @@ void SAC_SDL2_invert2( SDL2* disp, const int offsets[2], const int sizes[2])
   SAC_SDL2_lock( disp);
 
   if ( xoffset < 0 || yoffset < 0 ||
+       width < 0 || height < 0 ||
        xoffset + width  > SDL2_DISP_WIDTH( disp) ||
        yoffset + height > SDL2_DISP_HEIGHT( disp))
   {
-    SAC_RuntimeError( "SAC_SDL2_invert2: Offset [%d,%d] + array [%d,%d] "
-                      "exceeds display [%d,%d]\n",
+    SAC_RuntimeError( "SAC_SDL2_invert2: Invalid offset [%d,%d] + size [%d,%d] "
+                      "on display [%d,%d]\n",
                       xoffset, yoffset, width, height,
                       SDL2_DISP_WIDTH( disp), SDL2_DISP_HEIGHT( disp));
   }

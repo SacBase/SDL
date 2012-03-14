@@ -3,8 +3,10 @@ class SDL2;
 /*
  * This class implements a layer on top of the Simple DirectMedia Layer.
  * It is backwards compatible with the 'SDLdisplay' SAC module.
- * It adds features, is sometimes faster with pixel data
- * and may generate less updates.
+ * Compared to the 'SDLdisplay' module it adds features, is sometimes faster
+ * when copying data to pixel memory and may generate less screen updates.
+ * Debugging output is generated when the environment variable SDL2_DEBUG
+ * is set to 1, 2 or 3 for increasingly detailed output. 
  */
 
 external classtype;
@@ -91,6 +93,7 @@ external void destroyDisplay( SDL2& disp);
      */
 
 external SDL2 window( SDL2& disp, int[2] offset, int[2] size);
+    #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_window"
     #pragma linkobj  "src/SDL2/window.o"
     #pragma linksign [0,1,2,3]
@@ -124,6 +127,7 @@ void drawArrayMulti( SDL2& disp, color[.,.] array, int[2] pos)
 
 external void drawArrayOffset( SDL2& disp, 
                                color[.,.] array, int[2] offset);
+    #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_draw2"
     #pragma linkobj  "src/SDL2/draw.o"
     #pragma refcounting [1]
@@ -135,6 +139,7 @@ external void drawArrayOffset( SDL2& disp,
      */
 
 external int[2] getExtent( SDL2 &disp);
+    #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_extent"
     #pragma linkobj  "src/SDL2/extent.o"
     #pragma linksign [1,2]
@@ -143,17 +148,68 @@ external int[2] getExtent( SDL2 &disp);
      */
 
 external void drawPixel( SDL2 &disp, int[2] idx, color val);
+    #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_pixel"
     #pragma linkobj  "src/SDL2/pixel.o"
     #pragma refcounting [1,2]
     /*
      * Change the color value of a single pixel in the pixel buffer.
      * To update the pixel buffer to screen one of the update functions
-     * must be used. See below. It is best to draw a large number
-     * of pixels for one single call to update.
+     * must be used. See below. It is efficient to draw a large number
+     * of pixels before one call to update the screen.
+     */
+
+external void drawLine( SDL2& disp, int[2] point1, int[2] point2, bool async);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_line"
+    #pragma linkobj  "src/SDL2/line.o"
+    #pragma linksign [1,2,3,4]
+    /*
+     * Draw a line from point1 to point2. The parameter 'async' requests an
+     * asynchronous update when true. This is useful when drawing several 
+     * lines in succession if the last operation is done synchronously.
+     * Try to limit the number of successive asynchronous operations.
+     * When 'async' is false a synchronous screen update is done immediately.
+     */
+
+external void drawRect( SDL2& disp, int[2] offset, int[2] size, bool async);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_draw_rect"
+    #pragma linkobj  "src/SDL2/rect.o"
+    #pragma linksign [1,2,3,4]
+    /*
+     * Draw a rectangle on screen:
+     *   - The parameter 'offset' gives the X/Y position
+     *   - The parameter 'size' gives the Width/Height of the rectangle.
+     * Offset must be non-negative and 'offset' + 'size' must fit in 'disp'.
+     * The parameter 'async' has the same purpose as in drawLine.
+     */
+
+external void fillRect( SDL2& disp, int[2] offset, int[2] size, bool async);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_fill_rect"
+    #pragma linkobj  "src/SDL2/rect.o"
+    #pragma linksign [1,2,3,4]
+    /*
+     * Fill a rectangle on screen:
+     *   - The parameter 'offset' gives the X/Y position
+     *   - The parameter 'size' gives the Width/Height of the rectangle.
+     * Offset must be non-negative and 'offset' + 'size' must fit in 'disp'.
+     * The parameter 'async' has the same purpose as in drawLine.
+     */
+
+external void fillDisp( SDL2& disp, bool async);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_fill_disp"
+    #pragma linkobj  "src/SDL2/rect.o"
+    #pragma linksign [1,2]
+    /*
+     * Fill a window with the foreground color.
+     * The parameter 'async' has the same purpose as in drawLine.
      */
 
 external void invertRect( SDL2& disp, int[2] offset, int[2] size);
+    #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_invert2"
     #pragma linkobj  "src/SDL2/invert.o"
     #pragma linksign [1,2,3]
@@ -166,21 +222,23 @@ external void invertRect( SDL2& disp, int[2] offset, int[2] size);
      */
 
 external void updateDisp( SDL2& disp, bool async);
+    #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_update"
     #pragma linkobj  "src/SDL2/update.o"
     #pragma linksign [1,2]
     /*
-     * Update the display window. This copies the pixel buffer to screen.
-     * Use this function in combination with drawPixel.
+     * Update the display or the sub-window. This copies the pixel buffer
+     * to screen. Use this function in combination with drawPixel.
      *  - When 'async' is false the function waits for the update to complete.
      *  - When 'async' is true the function generates an update request
-     *    and immediately returns. Use with caution. Give the system
+     *    and immediately returns. Use this with caution. Give the system
      *    an appropriate amount of time to complete the request before
      *    generating another update request. Note that subsequent draw
      *    operations may also be shown by the asynchronous update.
      */
 
 external void updateRect( SDL2& disp, int[2] offset, int[2] size, bool async);
+    #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_update2"
     #pragma linkobj  "src/SDL2/update.o"
     #pragma linksign [1,2,3,4]
@@ -191,6 +249,7 @@ external void updateRect( SDL2& disp, int[2] offset, int[2] size, bool async);
      */
 
 external int[2,2] getSelection( SDL2 &disp);
+    #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_select"
     #pragma linkobj  "src/SDL2/select.o"
     #pragma linksign [1,2]
@@ -218,6 +277,22 @@ int[2], int[2,2] getSelectionMulti( SDL2 &disp, int[2] layout)
      * Ask the user to select an area in any of the subsections
      * of a multi-window using the left mouse button.
      * The middle mouse button cancels.
+     */
+
+external void background( color background);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_background"
+    #pragma linkobj  "src/SDL2/color.o"
+    /*
+     * Set the background color for future drawing operations.
+     */
+
+external void foreground( color foreground);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_foreground"
+    #pragma linkobj  "src/SDL2/color.o"
+    /*
+     * Set the foreground color for future drawing operations.
      */
 
 external void fullscreen( bool enable);
@@ -266,6 +341,7 @@ external SDL2 nullDisplay();
     #pragma linksign [0]
     /*
      * Return a NULL display as a placeholder.
+     * This is occasionally useful when programming in SAC.
      */
 
 external bool isNullDisplay( SDL2& disp);
@@ -275,5 +351,6 @@ external bool isNullDisplay( SDL2& disp);
     #pragma linksign [0,1]
     /*
      * Test if a display is a NULL display.
+     * This is occasionally useful when programming in SAC.
      */
 

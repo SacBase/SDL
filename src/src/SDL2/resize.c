@@ -30,13 +30,14 @@ void SAC_SDL2_resize( SDL2* disp,
     SDL_PushEvent( &event);
     SAC_SDL2_wait( disp);
   }
-  else if (SDL2_DISP_X( disp) + width >
+  else if (width < 1 || height < 1 ||
+           SDL2_DISP_X( disp) + width >
            SDL2_PARENT_X( disp) + SDL2_PARENT_WIDTH( disp) ||
            SDL2_DISP_Y( disp) + height >
            SDL2_PARENT_Y( disp) + SDL2_PARENT_HEIGHT( disp))
   {
-    SAC_RuntimeError( "SAC_SDL2_resize: resize [%d,%d] at [%d,%d] "
-                      "exceeds parent space [%d,%d]\n",
+    SAC_RuntimeError( "SAC_SDL2_resize: Invalid resize [%d,%d] at [%d,%d] "
+                      "on parent space [%d,%d]\n",
                       width, height,
                       SDL2_DISP_X( disp) - SDL2_PARENT_X( disp),
                       SDL2_DISP_Y( disp) - SDL2_PARENT_Y( disp),

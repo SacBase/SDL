@@ -1,5 +1,13 @@
 #include "SDL2sac.h"
 
+void SAC_SDL2_draw_a_pixel( SDL2* disp, int x, int y, Uint32 rgb)
+{
+  const int pitch = SDL2_PITCH( disp) / BYTES_PER_PIXEL;
+  Uint32*   videomem = (Uint32 *) SDL2_PIXELS( disp);
+
+  videomem[x + y * pitch] = rgb;
+}
+
 void SAC_SDL2_pixel( SDL2* disp, SAC_ND_PARAM_in( shp_nt, int), SAC_ND_PARAM_in( color_nt, int))
 {
   const int           pitch = SDL2_PITCH( disp) / BYTES_PER_PIXEL;

@@ -1,16 +1,22 @@
 #ifndef SDL2DATA_H
 #define SDL2DATA_H
 
-/* Macros for min/max.  */
+/* Boolean values. */
+#define TRUE    1
+#define FALSE   0
+
+/* Macros for min/max from <sys/param.h>.  */
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-#ifndef TRUE
-#define TRUE    1
-#endif
-#ifndef FALSE
-#define FALSE   0
-#endif
+/* Absolute difference between two scalars. */
+#define DELTA(a,b)      (((a) > (b)) ? ((a) - (b)) : ((b) - (a)))
+
+/* Restrict scalar 'a' to a range with lower boundary 'b' and upper 'c'. */
+#define LIMIT(a,b,c)    ((a) = ((a) < (b)) ? (b) : ((a) > (c)) ? (c) : (a))
+
+/* Swap two values. */
+#define SWAP2(type,v1,v2)      do{type _ = (v1); (v1) = (v2); (v2) = _;}while(0)
 
 /* semaphores */
 
@@ -81,5 +87,9 @@ struct SDL2 {
 #define SAC_SDL2_DEFAULT_HEADING "SaC SDL Display"
 #define SAC_SDL2_SELECT_HEADING  "Click and drag to select an area, " \
                                  "button-two click to cancel..."
+
+/* Colors */
+extern Uint32 SAC_SDL2_background_rgb;
+extern Uint32 SAC_SDL2_foreground_rgb;
 
 #endif

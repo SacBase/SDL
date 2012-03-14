@@ -1,7 +1,5 @@
 #include "SDL2sac.h"
 
-#define LIMIT(a,b,c)    ((a) = ((a) < (b)) ? (b) : ((a) > (c)) ? (c) : (a))
-
 enum SelectMode {
   SelNone = 0,
   SelStart,
@@ -30,10 +28,10 @@ void SAC_SDL2_start_selection( SDL2* disp)
 int SAC_SDL2_get_selection( int *sel)
 {
   if ( sel_mode == SelDone) {
-    sel[0] = (selection[0] <= selection[2]) ? selection[0] : selection[2];
-    sel[2] = (selection[0] <= selection[2]) ? selection[2] : selection[0];
-    sel[1] = (selection[1] <= selection[3]) ? selection[1] : selection[3];
-    sel[3] = (selection[1] <= selection[3]) ? selection[3] : selection[1];
+    sel[0] = MIN(selection[0], selection[2]);
+    sel[2] = MAX(selection[0], selection[2]);
+    sel[1] = MIN(selection[1], selection[3]);
+    sel[3] = MAX(selection[1], selection[3]);
   } else {
     sel[0] = sel[1] = sel[2] = sel[3] = -1;
   }

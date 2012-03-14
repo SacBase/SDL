@@ -1,11 +1,14 @@
 #include "SDL2sac.h"
 
+Uint32 SAC_SDL2_background_rgb = RGB( 0, 0, 0);
+Uint32 SAC_SDL2_foreground_rgb = RGB( 255, 255, 255);
+
 static int get_debug_level(void)
 {
   const char* p = getenv("SDL2_DEBUG");
   unsigned    level = 0;
 
-  if (p != NULL && sscanf(p, " %u", &level) <= 0) {
+  if (p && *p && sscanf(p, " %u", &level) <= 0) {
     level = 1;
   }
   return (int) level;
@@ -58,11 +61,13 @@ void SAC_SDL2_free_disp( SDL2* disp)
   SDL2_MAGIC( disp) = 0;
   SDL2_SURF( disp) = NULL;
 
-  SAC_SDL2_sem_free( SDL2_LOCK( disp));
-  SDL2_LOCK( disp) = NULL;
+  if (SDL2_ISROOT( disp)) {
+    SAC_SDL2_sem_free( SDL2_LOCK( disp));
+    SDL2_LOCK( disp) = NULL;
 
-  SAC_SDL2_sem_free( SDL2_SEM( disp));
-  SDL2_SEM( disp) = NULL;
+    SAC_SDL2_sem_free( SDL2_SEM( disp));
+    SDL2_SEM( disp) = NULL;
+  }
 
   free( disp);
 }

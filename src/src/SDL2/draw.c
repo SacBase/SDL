@@ -77,6 +77,7 @@ void SAC_SDL2_draw2( SDL2* disp, SAC_ND_PARAM_in( ar_nt, int), int offsets[2])
   SAC_SDL2_lock( disp);
 
   if ( xoffset < 0 || yoffset < 0 ||
+       width < 0 || height < 0 ||
        xoffset + width  > SDL2_DISP_WIDTH( disp) ||
        yoffset + height > SDL2_DISP_HEIGHT( disp))
   {

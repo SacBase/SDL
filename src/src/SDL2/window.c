@@ -21,11 +21,12 @@ SDL2* SAC_SDL2_window( SDL2* disp, int offsets[2], int sizes[2])
   SAC_SDL2_lock( disp);
 
   if ( xoffset < 0 || yoffset < 0 ||
+       width < 1 || height < 1 ||
        xoffset + width  > SDL2_DISP_WIDTH( disp) ||
        yoffset + height > SDL2_DISP_HEIGHT( disp))
   {
-    SAC_RuntimeError( "SAC_SDL2_window: Offset [%d,%d] + array [%d,%d] "
-                      "exceeds display [%d,%d]\n",
+    SAC_RuntimeError( "SAC_SDL2_window: Invalid offset [%d,%d] + size [%d,%d] "
+                      "on display [%d,%d]\n",
                       xoffset, yoffset, width, height,
                       SDL2_DISP_WIDTH( disp), SDL2_DISP_HEIGHT( disp));
   }

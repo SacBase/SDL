@@ -3,7 +3,16 @@
 
 /* close.c */
 
+
+/*
+ * Close a display or a sub-window.
+ */
 void SAC_SDL2_close( SDL2* disp);
+
+/* color.c */
+
+void SAC_SDL2_background( const int color[3]);
+void SAC_SDL2_foreground( const int color[3]);
 
 /* data.c */
 
@@ -47,6 +56,12 @@ void SAC_SDL2_stop( SDL2* disp);
 void SAC_SDL2_invert_rect( SDL2* disp, const int *pos, const int update);
 void SAC_SDL2_invert2( SDL2* disp, const int offsets[2], const int sizes[2]);
 
+/* line.c */
+
+void SAC_SDL2_line( SDL2* disp, const int P1[2], const int P2[2], int async);
+void SAC_SDL2_draw_a_line( SDL2* disp, int x1, int y1, int x2, int y2,
+                           Uint32 rgb, int update, int async);
+
 /* mouse.c */
 
 void SAC_SDL2_start_selection( SDL2* disp);
@@ -61,7 +76,15 @@ const char* SAC_SDL2_event_name(int evno);
 
 /* pixel.c */
 
+void SAC_SDL2_draw_a_pixel( SDL2* disp, int x, int y, Uint32 rgb);
 void SAC_SDL2_pixel( SDL2* disp, SAC_ND_PARAM_in( shp_nt, int), SAC_ND_PARAM_in( color_nt, int));
+
+/* rect.c */
+
+void SAC_SDL2_draw_rect( SDL2* disp, const int offsets[2], const int sizes[2],
+                         int async);
+void SAC_SDL2_fill_rect( SDL2* disp, const int offsets[2], const int sizes[2],
+                         int async);
 
 /* resize.c */
 
@@ -87,7 +110,6 @@ void SAC_SDL2_unlock( SDL2* disp);
 /* setup.c */
 
 int SAC_SDL2_setup( SDL2* disp);
-void SAC_SDL2_teardown_event( SDL_Event* event);
 void SAC_SDL2_teardown( SDL2* disp);
 
 /* title.c */

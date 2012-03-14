@@ -27,6 +27,7 @@ static void* SAC_SDL2_thread( void *vp)
   SAC_SDL2_post( disp);
   if (r == 0) {
     SAC_SDL2_event_loop( disp);
+    SDL_Quit();
   }
 
   if (SDL2_DEBUG( disp)) {
@@ -70,21 +71,14 @@ int SAC_SDL2_setup( SDL2* disp)
   return sdl_init_result;
 }
 
-void SAC_SDL2_teardown_event( SDL_Event* event)
-{
-  SDL2* disp = (SDL2 *) event->user.data2;
-  SAC_SDL2_post( disp);
-}
-
 void SAC_SDL2_teardown( SDL2* disp)
 {
-  int r;
+  int           r;
+  SDL_Event     event;
 
-  SDL_Event event;
   event.type = SDL2_TEARDOWN_EVENT;
   event.user.data2 = disp;
   SDL_PushEvent( &event);
-  SAC_SDL2_wait( disp);
 
   r = pthread_join( SAC_SDL2_thread_id, NULL);
   if (r) {

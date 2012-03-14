@@ -29,7 +29,7 @@ static const char* SAC_SDL2_event_names[] = {
   /* 25 */  "create_event",
   /* 26 */  "teardown_event",
   /* 27 */  "update_event",
-  /* 28 */  "update_ascyn_event",
+  /* 28 */  "update_async_event",
 };
 
 const char* SAC_SDL2_event_name(int evno)
