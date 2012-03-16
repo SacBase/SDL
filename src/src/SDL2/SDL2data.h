@@ -1,10 +1,6 @@
 #ifndef SDL2DATA_H
 #define SDL2DATA_H
 
-/* Boolean values. */
-#define TRUE    1
-#define FALSE   0
-
 /* Macros for min/max from <sys/param.h>.  */
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))

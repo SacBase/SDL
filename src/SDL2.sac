@@ -301,9 +301,12 @@ external void fullscreen( bool enable);
     #pragma linkobj  "src/SDL2/display.o"
     /*
      * Create future display windows fullscreen. Please note
-     * that this may change the system X11 video mode.
+     * that this may change the system X11 video mode!
      * Give the user a mechanism to terminate the program gracefully
      * or else the system may stay in an undesirable screen resolution.
+     * If all you want is the maximum screen resolution then 
+     * specify a width and height of zero to 'initDisp' and
+     * use 'noframe' to get rid of the window manager frame.
      */
 
 external void noframe( bool enable);

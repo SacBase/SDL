@@ -32,18 +32,18 @@ void SAC_SDL2_draw_rect( SDL2* disp, const int offsets[2], const int sizes[2],
     if (height > 1) {
       const int x = SDL2_DISP_X( disp) + xoffset;
       const int y = SDL2_DISP_Y( disp) + yoffset;
-      SAC_SDL2_draw_a_line( disp, x, y, x + width - 1, y, rgb, TRUE, TRUE);
-      SAC_SDL2_draw_a_line( disp, x, y + 1, x, y + height - 1, rgb, TRUE, TRUE);
+      SAC_SDL2_draw_a_line( disp, x, y, x + width - 1, y, rgb, true, true);
+      SAC_SDL2_draw_a_line( disp, x, y + 1, x, y + height - 1, rgb, true, true);
       if (width > 2) {
         SAC_SDL2_draw_a_line( disp,
                               x + 1, y + height - 1,
                               x + width - 1, y + height - 1,
-                              rgb, TRUE, TRUE);
+                              rgb, true, true);
       }
       SAC_SDL2_draw_a_line( disp,
                             x + width - 1, y + 1,
                             x + width - 1, y + height - 1,
-                            rgb, TRUE, FALSE);
+                            rgb, true, false);
     }
     else if (height == 1) {
       SAC_SDL2_draw_a_line( disp,
@@ -51,7 +51,7 @@ void SAC_SDL2_draw_rect( SDL2* disp, const int offsets[2], const int sizes[2],
                             SDL2_DISP_Y( disp) + yoffset,
                             SDL2_DISP_X( disp) + xoffset + width - 1,
                             SDL2_DISP_Y( disp) + yoffset,
-                            rgb, TRUE, async);
+                            rgb, true, async);
     }
   }
   else if (width == 1) {
@@ -61,7 +61,7 @@ void SAC_SDL2_draw_rect( SDL2* disp, const int offsets[2], const int sizes[2],
                             SDL2_DISP_Y( disp) + yoffset,
                             SDL2_DISP_X( disp) + xoffset,
                             SDL2_DISP_Y( disp) + yoffset + height - 1,
-                            rgb, TRUE, async);
+                            rgb, true, async);
     }
     else if (height == 1) {
       SAC_SDL2_draw_a_pixel( disp,
@@ -71,7 +71,7 @@ void SAC_SDL2_draw_rect( SDL2* disp, const int offsets[2], const int sizes[2],
       SAC_SDL2_update_rect( disp, 
                             SDL2_DISP_X( disp) + xoffset,
                             SDL2_DISP_Y( disp) + yoffset,
-                            1, 1, TRUE);
+                            1, 1, true);
     }
   }
 

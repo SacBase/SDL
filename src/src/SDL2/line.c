@@ -31,7 +31,7 @@ void SAC_SDL2_line( SDL2* disp, const int P1[2], const int P2[2], int async)
                           SDL2_DISP_X( disp) + x2,
                           SDL2_DISP_Y( disp) + y2,
                           SAC_SDL2_foreground_rgb,
-                          TRUE,
+                          true,
                           async);
   }
 

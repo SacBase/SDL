@@ -21,6 +21,7 @@ void SAC_SDL2_sem_free( sem_t* sem)
   if (r) {
     SAC_RuntimeError( "SAC_SDL2_sem_free: sem_destroy failed: %d: %m\n", r);
   }
+  free( sem);
 }
 
 void SAC_SDL2_sem_post( sem_t* sem)

@@ -49,7 +49,7 @@ void SAC_SDL2_draw( SDL2* disp,
     SAC_SDL2_update_rect( disp,
                           SDL2_DISP_X( disp), SDL2_DISP_Y( disp),
                           width, height,
-                          FALSE);
+                          false);
   }
 
   SAC_SDL2_unlock( disp);
@@ -96,7 +96,7 @@ void SAC_SDL2_draw2( SDL2* disp, SAC_ND_PARAM_in( ar_nt, int), int offsets[2])
                           SDL2_DISP_X( disp) + xoffset,
                           SDL2_DISP_Y( disp) + yoffset,
                           width, height,
-                          FALSE);
+                          false);
   }
 
   SAC_SDL2_unlock( disp);

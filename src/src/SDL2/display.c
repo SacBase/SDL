@@ -1,5 +1,4 @@
 #include "SDL2sac.h"
-#include <limits.h>
 
 static Uint32    SAC_SDL2_fullscreen_flag;
 static Uint32    SAC_SDL2_noframe_flag;

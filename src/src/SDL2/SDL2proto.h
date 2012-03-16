@@ -85,6 +85,7 @@ void SAC_SDL2_draw_rect( SDL2* disp, const int offsets[2], const int sizes[2],
                          int async);
 void SAC_SDL2_fill_rect( SDL2* disp, const int offsets[2], const int sizes[2],
                          int async);
+void SAC_SDL2_fill_disp( SDL2* disp, int async);
 
 /* resize.c */
 

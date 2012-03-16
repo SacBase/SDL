@@ -41,7 +41,7 @@ int SAC_SDL2_get_selection( int *sel)
 
 static void invert(void)
 {
-  SAC_SDL2_invert_rect( sel_disp, selection, TRUE);
+  SAC_SDL2_invert_rect( sel_disp, selection, true);
 }
 
 static int next_event_type(void)

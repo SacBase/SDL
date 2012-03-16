@@ -57,8 +57,8 @@ void SAC_SDL2_invert2( SDL2* disp, const int offsets[2], const int sizes[2])
     pos[1] = yoffset + SDL2_DISP_Y( disp);
     pos[2] = pos[0] + width - 1;
     pos[3] = pos[1] + height - 1;
-    SAC_SDL2_invert_rect( disp, pos, FALSE);
-    SAC_SDL2_update_rect( disp, pos[0], pos[1], width, height, FALSE);
+    SAC_SDL2_invert_rect( disp, pos, false);
+    SAC_SDL2_update_rect( disp, pos[0], pos[1], width, height, false);
   }
 
   SAC_SDL2_unlock( disp);
