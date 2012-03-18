@@ -11,8 +11,11 @@ void SAC_SDL2_close( SDL2* disp);
 
 /* color.c */
 
-void SAC_SDL2_background( const int color[3]);
-void SAC_SDL2_foreground( const int color[3]);
+void SAC_SDL2_set_background( const int color[3]);
+void SAC_SDL2_get_background( SAC_ND_PARAM_out_nodesc( aks_out_nt, int));
+void SAC_SDL2_set_foreground( const int color[3]);
+void SAC_SDL2_get_foreground( SAC_ND_PARAM_out_nodesc( aks_out_nt, int));
+void SAC_SDL2_get_color( SAC_ND_PARAM_out_nodesc( aks_out_nt, int), char* name);
 
 /* data.c */
 
@@ -44,6 +47,11 @@ void SAC_SDL2_event_loop( SDL2* disp);
 /* extent.c */
 
 void SAC_SDL2_extent( SAC_ND_PARAM_out_nodesc( aks_out_nt, int), SDL2* disp);
+
+/* font.c */
+
+void SAC_SDL2_text( SDL2* disp, char* text, int offsets[2], int async);
+void SAC_SDL2_text_extent( SAC_ND_PARAM_out_nodesc( aks_out_nt, int),  char* text);
 
 /* init.c */
 

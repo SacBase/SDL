@@ -43,7 +43,7 @@ void SAC_SDL2_draw_rect( SDL2* disp, const int offsets[2], const int sizes[2],
       SAC_SDL2_draw_a_line( disp,
                             x + width - 1, y + 1,
                             x + width - 1, y + height - 1,
-                            rgb, true, false);
+                            rgb, true, async);
     }
     else if (height == 1) {
       SAC_SDL2_draw_a_line( disp,
@@ -87,8 +87,8 @@ static void fill_a_rect( SDL2* disp, int xoff, int yoff, int wid, int hei, int a
   int          x, y;
 
   if (SDL2_DEBUG( disp)) {
-    printf("fill_a_rect: [%d,%d]:[%d,%d], %d, 0x%x\n",
-            xoff, yoff, wid, hei, async, rgb);
+    printf("%sfill_a_rect: [%d,%d]:[%d,%d], %d, 0x%x\n",
+            When( disp), xoff, yoff, wid, hei, async, rgb);
   }
 
   for (y = 0; y < hei; ++y) {

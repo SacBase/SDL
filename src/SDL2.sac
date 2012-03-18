@@ -248,6 +248,29 @@ external void updateRect( SDL2& disp, int[2] offset, int[2] size, bool async);
      *   - size the Width/Height of the rectangle.
      */
 
+external void drawText( SDL2& disp, string text, int[2] offset, bool async);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_text"
+    #pragma linkobj  "src/SDL2/font.o"
+    #pragma linksign [1,2,3,4]
+    /*
+     * Display text at the given offset. Offset must fit in disp.
+     * The drawing of 'text' is clipped by disp's dimensions.
+     * Newlines '\n' and tabs '\t' change the cursor position. 
+     * The text is written in the foreground color. The background
+     * should have been cleared by the caller when this is desirable.
+     */
+
+external int[2,2] textExtent( string text);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_text_extent"
+    #pragma linkobj  "src/SDL2/font.o"
+    #pragma linksign [1,2]
+    /*
+     * Calculate the offset and the dimensions of the area
+     * that will be needed to completely display a text string.
+     */
+
 external int[2,2] getSelection( SDL2 &disp);
     #pragma effect   TheWorld
     #pragma linkname "SAC_SDL2_select"
@@ -281,18 +304,49 @@ int[2], int[2,2] getSelectionMulti( SDL2 &disp, int[2] layout)
 
 external void background( color background);
     #pragma effect   TheWorld
-    #pragma linkname "SAC_SDL2_background"
+    #pragma linkname "SAC_SDL2_set_background"
     #pragma linkobj  "src/SDL2/color.o"
     /*
      * Set the background color for future drawing operations.
      */
 
+external color background( );
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_get_background"
+    #pragma linkobj  "src/SDL2/color.o"
+    #pragma linksign [1]
+    /*
+     * Request the current background color.
+     */
+
 external void foreground( color foreground);
     #pragma effect   TheWorld
-    #pragma linkname "SAC_SDL2_foreground"
+    #pragma linkname "SAC_SDL2_set_foreground"
     #pragma linkobj  "src/SDL2/color.o"
     /*
      * Set the foreground color for future drawing operations.
+     */
+
+external color foreground( );
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_get_foreground"
+    #pragma linkobj  "src/SDL2/color.o"
+    #pragma linksign [1]
+    /*
+     * Request the current foreground color.
+     */
+
+external color getColor( string name);
+    #pragma effect   TheWorld
+    #pragma linkname "SAC_SDL2_get_color"
+    #pragma linkobj  "src/SDL2/color.o"
+    #pragma linksign [1, 2]
+    /*
+     * Request an RGB color representation for the named color.
+     * If name starts with a hash '#' either 3 or 6 hexadecimal digits
+     * must follow, which represent a color similar to HTML colors.
+     * Else name is looked up in the system's rgb.txt file.
+     * If no color could be found then the color white is returned.
      */
 
 external void fullscreen( bool enable);

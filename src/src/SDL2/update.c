@@ -2,15 +2,11 @@
 
 void SAC_SDL2_update_display_event( SDL_Event* event)
 {
-  SDL_Rect* rect = event->user.data1;
+  SDL_Rect* rect = (SDL_Rect *) &event->user.code;
   SDL2*     disp = event->user.data2;
 
   SDL_UpdateRect( SDL2_SURF( disp), rect->x, rect->y, rect->w, rect->h);
-
-  if (event->type == SDL2_UPDATE_ASYNC_EVENT) {
-    free( rect);
-  }
-  else {
+  if (event->type == SDL2_UPDATE_EVENT) {
     SAC_SDL2_post( disp);
   }
 }
@@ -21,29 +17,21 @@ void SAC_SDL2_update_display_event( SDL_Event* event)
 void SAC_SDL2_update_rect( SDL2* disp, int x, int y, int w, int h, int async)
 {
   SDL_Event event;
-  SDL_Rect  rect;
   SDL_Rect* rect_ptr;
 
-  if (async) {
-    event.type = SDL2_UPDATE_ASYNC_EVENT;
-    rect_ptr = (SDL_Rect *) SAC_MALLOC( sizeof( SDL_Rect));
-    rect_ptr->x = x;
-    rect_ptr->y = y;
-    rect_ptr->w = w;
-    rect_ptr->h = h;
-    event.user.data1 = rect_ptr;
-    event.user.data2 = disp;
-    SDL_PushEvent( &event);
+  if (SDL2_DEBUG( disp)) {
+    printf("%sSAC_SDL2_update_rect: [%d,%d]:[%d,%d] %s\n",
+            When( disp), x, y, w, h, async ? "async" : "sync");
   }
-  else {
-    event.type = SDL2_UPDATE_EVENT;
-    rect.x = x;
-    rect.y = y;
-    rect.w = w;
-    rect.h = h;
-    event.user.data1 = &rect;
-    event.user.data2 = disp;
-    SDL_PushEvent( &event);
+  event.type = async ? SDL2_UPDATE_ASYNC_EVENT : SDL2_UPDATE_EVENT;
+  rect_ptr = (SDL_Rect *) &event.user.code;
+  rect_ptr->x = x;
+  rect_ptr->y = y;
+  rect_ptr->w = w;
+  rect_ptr->h = h;
+  event.user.data2 = disp;
+  SDL_PushEvent( &event);
+  if ( ! async) {
     SAC_SDL2_wait( disp);
   }
 }
