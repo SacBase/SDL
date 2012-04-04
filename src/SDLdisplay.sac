@@ -95,7 +95,7 @@ int[2], int[2,2] getSelectionMulti( SDLdisplay &disp, int[2] layout)
   pos = { [i] -> selection[[i]] - 3 * field[[i]] - field[[i]] * shp};
 
   if (all( field[[0]] != field[[1]])) {
-    pos[[1]] = shape - 1;
+    pos[[1]] = shp - 1;
   } 
 
   return( field[[0]], pos);
