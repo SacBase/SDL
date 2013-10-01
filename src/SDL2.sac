@@ -1,5 +1,9 @@
 class SDL2;
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /*
  * This class implements a layer on top of the Simple DirectMedia Layer.
  * It is backwards compatible with the 'SDLdisplay' SAC module.
@@ -33,9 +37,9 @@ external SDL2 initDisplay( int[2] shp);
     #pragma linkobj  "src/SDL2/setup.o"
     #pragma linkobj  "src/SDL2/title.o"
     #pragma linkobj  "src/SDL2/update.o"
-    #pragma linkwith "SDL"
-    #pragma linkwith "pthread"
+#ifdef NEED_LIBRT
     #pragma linkwith "rt"
+#endif
     #pragma refcounting [1]
     /*
      * Open a new display window on screen.
