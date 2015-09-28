@@ -28,12 +28,12 @@ void SAC_SDL2_heading( const char* heading)
   SDL_WM_SetCaption( heading, NULL);
 }
 
-void SAC_SDL2_default_heading()
+void SAC_SDL2_default_heading( void)
 {
   SDL_WM_SetCaption( get_argv0(), NULL);
 }
 
-void SAC_SDL2_select_heading()
+void SAC_SDL2_select_heading( void)
 {
   SDL_WM_SetCaption( SAC_SDL2_SELECT_HEADING, NULL);
 }

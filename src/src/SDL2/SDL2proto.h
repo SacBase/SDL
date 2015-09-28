@@ -124,8 +124,8 @@ void SAC_SDL2_teardown( SDL2* disp);
 /* title.c */
 
 void SAC_SDL2_heading( const char* heading);
-void SAC_SDL2_default_heading();
-void SAC_SDL2_select_heading();
+void SAC_SDL2_default_heading( void);
+void SAC_SDL2_select_heading( void);
 void SAC_SDL2_cursor( int enable);
 
 /* update.c */
