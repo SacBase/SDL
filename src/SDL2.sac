@@ -1,9 +1,5 @@
 class SDL2;
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 /*
  * This class implements a layer on top of the Simple DirectMedia Layer.
  * It is backwards compatible with the 'SDLdisplay' SAC module.
@@ -37,6 +33,10 @@ external SDL2 initDisplay( int[2] shp);
     #pragma linkobj  "src/SDL2/setup.o"
     #pragma linkobj  "src/SDL2/title.o"
     #pragma linkobj  "src/SDL2/update.o"
+/* FIXME(artem) I don't see any use of the rt functionality in those functions
+                and I don't understand why one should ever link with rt here...
+                Some testing is needed to find out.  After that, either remove
+                three lines below, or add check for rt and remove this comment.  */
 #ifdef NEED_LIBRT
     #pragma linkwith "rt"
 #endif

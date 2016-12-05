@@ -22,7 +22,7 @@ FIND_PACKAGE (SDL REQUIRED)
 SET (SAC2C_EXTRA_INC    "-I${SDL_INCLUDE_DIR}"
      CACHE STRING "Extra include files that should be used by sac2c")
 
-# TODO add check for librt, see SDL2:40
+# TODO test if librt is ever needed, see SDL2:40, and add the check.
 
 # For every target run CMakeLists.txt in src
 FOREACH (TARGET IN ITEMS ${TARGETS})
