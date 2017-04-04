@@ -14,6 +14,7 @@ SET (LINKSETSIZE        "0"         CACHE STRING "Set a value for -linksetsize p
 
 # Check whether sac2c is operational
 INCLUDE ("cmake-common/check-sac2c.cmake")
+INCLUDE ("cmake-common/misc-macros.cmake")
 
 # NB: Despite the name SDL2.sac, the module still relies on 
 # the "old" libSDL v1, not libSDL2.
@@ -28,3 +29,6 @@ SET (SAC2C_EXTRA_INC    "-I${SDL_INCLUDE_DIR}"
 FOREACH (TARGET IN ITEMS ${TARGETS})
     ADD_SUBDIRECTORY (src   src-${TARGET})
 ENDFOREACH ()
+
+# This build target is responsible for generating the package sac2crc file
+CREATE_SAC2CRC_TARGET ("sdl" "${DLL_BUILD_DIR}" "${DLL_BUILD_DIR}")
