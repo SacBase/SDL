@@ -16,7 +16,7 @@ SET (LINKSETSIZE        "0"         CACHE STRING "Set a value for -linksetsize p
 INCLUDE ("cmake-common/check-sac2c.cmake")
 INCLUDE ("cmake-common/misc-macros.cmake")
 
-# NB: Despite the name SDL2.sac, the module still relies on 
+# NB: Despite the name SDL2.sac, the module still relies on
 # the "old" libSDL v1, not libSDL2.
 FIND_PACKAGE (SDL REQUIRED)
 
