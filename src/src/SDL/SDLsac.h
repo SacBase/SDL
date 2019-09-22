@@ -8,7 +8,7 @@
 #undef UPDATE_VIA_SEMAPHORE
 #define ADAPTIVE_MODE
 
-typedef SDL_Surface* Display;
+typedef SDL_Surface* SDLdisplay;
 
 extern SDL_Thread *SDLsac_eventhandler;
 extern SDL_mutex *SDLsac_mutex;

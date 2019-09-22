@@ -2,7 +2,7 @@
 #include "SDLsac.h"
 
 void SAC_SDL_getExtent( SAC_ND_PARAM_out_nodesc( aks_out_nt, int),
-                        SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display))
+                        SAC_ND_PARAM_inout_nodesc_bx( disp_nt, SDLdisplay))
 {
   SAC_ND_DECL__DATA( aks_nt, int, );
   

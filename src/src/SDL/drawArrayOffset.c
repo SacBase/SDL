@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 void SAC_SDL_drawArrayOffset( 
-       SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
+       SAC_ND_PARAM_inout_nodesc_bx( disp_nt, SDLdisplay),
        SAC_ND_PARAM_in( ar_nt, int),
        int pic_offset[2]
      )

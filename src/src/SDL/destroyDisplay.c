@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void SAC_SDL_destroyDisplay( SAC_ND_PARAM_in_nodesc( disp_nt, Display))
+void SAC_SDL_destroyDisplay( SAC_ND_PARAM_in_nodesc( disp_nt, SDLdisplay))
 {
   SDL_Event event;
 

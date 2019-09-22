@@ -1,6 +1,7 @@
 #include "SDLsac.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <X11/Xlib.h>
 
 #define MIN_UPDATE_INTERVAL 50
 #define START_UPDATE_INTERVAL 200
@@ -55,7 +56,7 @@ int UpdateScreen( void *surface)
 }
 
 static
-void InvertRect( Display disp, int *pos)
+void InvertRect( SDLdisplay disp, int *pos)
 {
   int yaxis, xaxis;
   int x1, x2, y1, y2;
@@ -176,12 +177,12 @@ int EventHandler( void *screen)
 
         case SDL_MOUSEMOTION:
           if (SDLsac_selmode == SEL_bottom) {
-            InvertRect( (Display) screen, SDLsac_selection);
+            InvertRect( (SDLdisplay) screen, SDLsac_selection);
 
             SDLsac_selection[2] = event.motion.x;
             SDLsac_selection[3] = event.motion.y;
 
-            InvertRect( (Display) screen, SDLsac_selection);
+            InvertRect( (SDLdisplay) screen, SDLsac_selection);
           }
           break;
 
@@ -231,11 +232,15 @@ Uint32 TimerHandler(Uint32 interval, void *param) {
 }
 
 
-void SAC_SDL_initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, Display),
+void SAC_SDL_initDisplay( SAC_ND_PARAM_out_nodesc( disp_nt, SDLdisplay),
                           SAC_ND_PARAM_in( shp_nt, int),
                           SAC_ND_PARAM_in( async_nt, bool))
 {
-  SAC_ND_DECL__DATA( disp_nt, Display, )
+  SAC_ND_DECL__DATA( disp_nt, SDLdisplay, )
+
+  // XXX this is a quick fix to resolve an issue that some users have experienced
+  //     when running a SAC-SDL application over SSH (X-forwarded)...
+  XInitThreads ();
 
   if (SDL_Init( SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
     SAC_RuntimeError( "Failed to init SDL System: %s", SDL_GetError());

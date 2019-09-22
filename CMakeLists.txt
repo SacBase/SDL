@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 3.3)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.10)
 
 PROJECT (sac-sdl)
 #FIXME(artem) we can create a definitoin for language "SAC" which will
@@ -20,12 +20,16 @@ INCLUDE ("cmake-common/misc-macros.cmake")
 
 # NB: Despite the name SDL2.sac, the module still relies on
 # the "old" libSDL v1, not libSDL2.
+SET (SDL_BUILDING_LIBRARY ON)
 FIND_PACKAGE (SDL REQUIRED)
 
-SET (SAC2C_EXTRA_INC    "-I${SDL_INCLUDE_DIR}"
+# and X11
+FIND_PACKAGE (X11 REQUIRED)
+
+SET (SAC2C_EXTRA_INC    "-I${SDL_INCLUDE_DIR}" "-I${X11_INCLUDE_DIR}"
      CACHE STRING "Extra include files that should be used by sac2c")
 
-SET (SAC2C_CPP_INC "")
+SET (SAC2C_CPP_INC "-Xl" "-lX11" "-Xtl" "-lX11")
 
 # if building generically, we need to make sure sac2c supports this
 IF (BUILDGENERIC)

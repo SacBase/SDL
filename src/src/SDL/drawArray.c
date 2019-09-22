@@ -2,7 +2,7 @@
 
 #include <unistd.h>
 
-void SAC_SDL_drawArray( SAC_ND_PARAM_inout_nodesc_bx( disp_nt, Display),
+void SAC_SDL_drawArray( SAC_ND_PARAM_inout_nodesc_bx( disp_nt, SDLdisplay),
                         SAC_ND_PARAM_in( ar_nt, int))
 {
   int xaxis, yaxis, aroffset, screenoffset;
