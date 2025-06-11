@@ -18,7 +18,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt upgrade -y
-          sudo apt install -y libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+          sudo apt install -y libsdl1.2-dev libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
       - name: Install SaC
         run: |
           wget ${BASE_URL}/Ubl22/sac2c-basic.deb
