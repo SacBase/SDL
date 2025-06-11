@@ -16,7 +16,7 @@ jobs:
           submodules: 'recursive'
       - name: Install SDL
         run: |
-          supo apt update
+          sudo apt update
           sudo apt upgrade -y
           sudo apt install -y libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
       - name: Install SaC
