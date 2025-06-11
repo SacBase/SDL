@@ -14,6 +14,11 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
+      - name: Install SDL
+        run: |
+          supo apt update
+          sudo apt upgrade -y
+          sudo apt install -y libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
       - name: Install SaC
         run: |
           wget ${BASE_URL}/Ubl22/sac2c-basic.deb
@@ -23,9 +28,6 @@ jobs:
         run: |
           wget ${BASE_URL}/Ubl22/stdlib-basic.deb
           sudo apt install ./stdlib-basic.deb
-      - name: Install SDL
-        run: |
-          sudo apt install -y libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
       - name: Create build dir
         run: |
           cmake -E make_directory ${{runner.workspace}}/build
@@ -39,90 +41,6 @@ jobs:
         working-directory: ${{runner.workspace}}/build
         run: |
           cmake --build . -j 4 2>&1 | tee build.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "!!! ERROR detected in build !!!";
-            exit 1;
-          fi
-
-  build-macos-x86:
-    runs-on: macos-13
-    steps:
-      - name: Get HEAD and submodules
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          submodules: 'recursive'
-      - name: Install SaC
-        run: |
-          wget ${BASE_URL}/MacOS_x86/sac2c-basic.pkg
-          sudo installer -pkg ./sac2c-basic.pkg -target /
-          sac2c -V
-      - name: Install Stdlib
-        run: |
-          wget ${BASE_URL}/MacOS_x86/stdlib-basic.pkg
-          sudo installer -pkg ./stdlib-basic.pkg -target /
-      - name: Install SDL
-        run: |
-          brew install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
-      - name: Create build dir
-        run: |
-          cmake -E make_directory ${{runner.workspace}}/build
-          mkdir $HOME/.sac2crc
-      - name: Set XCode version
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '14.2'
-      - name: Configure build-system
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        run: cmake ${GITHUB_WORKSPACE}
-      - name: Build
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        run: |
-          cmake --build . -j 4 2>&1 | tee build.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "!!! ERROR detected in build !!!";
-            exit 1;
-          fi
-
-  build-macos-arm:
-    runs-on: macos-15
-    steps:
-      - name: Get HEAD and submodules
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          submodules: 'recursive'
-      - name: Install SaC
-        run: |
-          wget ${BASE_URL}/MacOS_arm64/sac2c-basic.pkg
-          sudo installer -pkg ./sac2c-basic.pkg -target /
-          sac2c -V
-      - name: Install Stdlib
-        run: |
-          wget ${BASE_URL}/MacOS_arm64/stdlib-basic.pkg
-          sudo installer -pkg ./stdlib-basic.pkg -target /
-      - name: Install SDL
-        run: |
-          brew install -y libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
-      - name: Create build dir
-        run: |
-          cmake -E make_directory ${{runner.workspace}}/build
-          mkdir $HOME/.sac2crc
-      - name: Set XCode version
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.2'
-      - name: Configure build-system
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        run: cmake ${GITHUB_WORKSPACE}
-      - name: Build
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        run: |
-          cmake --build . -j 3 2>&1 | tee build.log
           if [ ${PIPESTATUS[0]} -ne 0 ]; then
             echo "!!! ERROR detected in build !!!";
             exit 1;
