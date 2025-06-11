@@ -7,7 +7,7 @@ void SAC_SDL2_close( SDL2* disp)
 {
   SAC_SDL2_check( disp);
   if (SDL2_DEBUG( disp)) {
-    printf("%sSAC_SDL2_close: %p\n", When( disp), disp);
+    printf("%sSAC_SDL2_close: %p\n", When( disp), (void *)disp);
   }
 
   if (SDL2_ISROOT( disp)) {

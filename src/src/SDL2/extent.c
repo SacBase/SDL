@@ -6,7 +6,7 @@ void SAC_SDL2_extent( SAC_ND_PARAM_out_nodesc( aks_out_nt, int), SDL2* disp)
 
   SAC_SDL2_check( disp);
   if (SDL2_DEBUG( disp)) {
-    printf("%sSAC_SDL2_extent: %p\n", When( disp), disp);
+    printf("%sSAC_SDL2_extent: %p\n", When( disp), (void *)disp);
   }
 
   /*

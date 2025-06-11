@@ -17,14 +17,11 @@ likely operational `pthreads`. NB. The SDL version 2 library is not, at present,
 supported.
 
 ```sh
-$ cd SDL
-$ git submodule init
-$ git submodule update
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make -j4
-$ make install //you might need to use `sudo'
+git submodule update --init --recursive
+mkdir build
+cd build
+cmake <OPTIONS> ..
+make -j4
 ```
 
 Variables that can be passed to CMake
@@ -39,5 +36,5 @@ When running CMake it is possible to pass the following variables:
     The rule of thumb:
     * value `0` is the fastest time-wise but potentially results in a large memory consumption
     * value `1` reduces the memory consumption to minimum, buy significantly increases compilation time.
-    
+
       *Default value: 500.*

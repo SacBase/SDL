@@ -2,101 +2,92 @@ class SDLdisplay;
 
 external classtype;
 
-use Structures: all;
+use ArrayArith: { +, -, *, /, != };
+use ArrayBasics: { sel, modarray };
+use Color8: { Color8 };
+use World: { TheWorld };
 
 export all;
 
-SDLdisplay initDisplay( int[.] shp)
+SDLdisplay initDisplay(int[.] shp)
 {
-  return( initDisplay( shp, true));
+    return initDisplay(shp, true);
 }
 
-SDLdisplay initMultiDisplay( int[2] layout, int[2] disp_shp)
+SDLdisplay initMultiDisplay(int[2] layout, int[2] disp_shp)
 {
-  size = layout * disp_shp + (layout-1)*3;
+    size = layout * disp_shp + (layout - 1) * 3;
+    res = initDisplay(size, true);
 
-  res = initDisplay( size, true);
+    frame = with {
+                (. <= iv <= . step (disp_shp + 3) width disp_shp) : (Color8)[0,0,0];
+            } : genarray(size, (Color8)[255,255,255]);
 
-  frame = with {
-            ( . <= iv <= . step (disp_shp + 3) width disp_shp) : black();
-          } : genarray( size, white());
-
-  drawArray( res, frame);
-
-  return( res);
+    drawArray(res, frame);
+    return res;
 }
 
-external SDLdisplay initDisplay( int[2] shp, bool async);
-#pragma linkname "SAC_SDL_initDisplay"
-#pragma linkobj "src/SDL/initDisplay.o"
-#pragma linkwith "SDL"
-#pragma effect World::TheWorld
-#pragma refcounting [1]
+external SDLdisplay initDisplay(int[2] shp, bool async);
+    #pragma effect TheWorld
+    #pragma linkname "SAC_SDL_initDisplay"
+    #pragma linkobj "src/SDL/initDisplay.o"
+    #pragma linkwith "SDL"
+    #pragma refcounting [1]
 
-external void destroyDisplay( SDLdisplay disp);
-#pragma linkname "SAC_SDL_destroyDisplay"
-#pragma linkobj "src/SDL/destroyDisplay.o"
-#pragma effect World::TheWorld
-#pragma linkwith "SDL"
+external void destroyDisplay(SDLdisplay disp);
+    #pragma effect TheWorld
+    #pragma linkname "SAC_SDL_destroyDisplay"
+    #pragma linkobj "src/SDL/destroyDisplay.o"
+    #pragma linkwith "SDL"
 
-external int[2] getExtent( SDLdisplay &disp);
-#pragma linkname "SAC_SDL_getExtent"
-#pragma linkobj "src/SDL/getExtent.o"
-#pragma linkwith "SDL"
-#pragma linksign  [1,2]
+external int[2] getExtent(SDLdisplay &disp);
+    #pragma linkname "SAC_SDL_getExtent"
+    #pragma linkobj "src/SDL/getExtent.o"
+    #pragma linkwith "SDL"
+    #pragma linksign  [1,2]
 
-external void drawArray( SDLdisplay &disp, color[.,.] array);
-#pragma linkname "SAC_SDL_drawArray"
-#pragma linkobj "src/SDL/drawArray.o"
-#pragma linkwith "SDL"
-#pragma refcounting [1]
+external void drawArray(SDLdisplay &disp, Color8[.,.] array);
+    #pragma linkname "SAC_SDL_drawArray"
+    #pragma linkobj "src/SDL/drawArray.o"
+    #pragma linkwith "SDL"
+    #pragma refcounting [1]
 
-void drawArrayMulti( SDLdisplay &disp, color[.,.] array, int[2] pos)
+void drawArrayMulti(SDLdisplay &disp, Color8[2:shp] array, int[2] pos)
 {
-  drawArrayOffset( disp, array, (shape( array)+3) *  pos);
+    drawArrayOffset(disp, array, (shp + 3) * pos);
 }
 
-external void drawArrayOffset( SDLdisplay &disp, 
-                               color[.,.] array, int[2] pic_offset);
-#pragma linkname "SAC_SDL_drawArrayOffset"
-#pragma linkobj "src/SDL/drawArrayOffset.o"
-#pragma linkwith "SDL"
-#pragma refcounting [1]
+external void drawArrayOffset(SDLdisplay &disp,
+                              Color8[.,.] array, int[2] pic_offset);
+    #pragma linkname "SAC_SDL_drawArrayOffset"
+    #pragma linkobj "src/SDL/drawArrayOffset.o"
+    #pragma linkwith "SDL"
+    #pragma refcounting [1]
 
-external void drawPixel( SDLdisplay &disp, int[2] idx, color val);
-#pragma linkname "SAC_SDL_drawPixel"
-#pragma linkobj "src/SDL/drawPixel.o"
-#pragma linkwith "SDL"
-#pragma refcounting [1,2]
+external void drawPixel(SDLdisplay &disp, int[2] idx, Color8 val);
+    #pragma linkname "SAC_SDL_drawPixel"
+    #pragma linkobj "src/SDL/drawPixel.o"
+    #pragma linkwith "SDL"
+    #pragma refcounting [1,2]
 
-#if THEO_IS_A_SUPERHERO
-void drawArrayDynamic( SDLdisplay &disp, color[.,.] array)
+external int[2,2] getSelection(SDLdisplay &disp);
+    #pragma linkname "SAC_SDL_getSelection"
+    #pragma linkobj "src/SDL/getSelection.o"
+    #pragma linkwith "SDL"
+    #pragma linksign [1,2]
+
+int[2], int[2,2] getSelectionMulti(SDLdisplay &disp, int[2] layout)
 {
-  res = with {
-          ( 0*shape( array) <= iv < shape( array)) : drawPixel( disp, iv, array[iv]);
-        } : propagate( disp );
-  return();
-}
-#endif
+    selection = getSelection(disp);
+    extent = getExtent(disp);
+    shp = (extent - 3 * (layout - 1)) / layout;
 
-external int[2,2] getSelection( SDLdisplay &disp);
-#pragma linkname "SAC_SDL_getSelection"
-#pragma linkobj "src/SDL/getSelection.o"
-#pragma linkwith "SDL"
-#pragma linksign [1,2]
+    field = { [i] -> selection[[i]] / (shp + 3)};
+    pos = { [i] -> selection[[i]] - 3 * field[[i]] - field[[i]] * shp};
 
-int[2], int[2,2] getSelectionMulti( SDLdisplay &disp, int[2] layout)
-{
-  selection = getSelection( disp);
-  extent = getExtent( disp);
-  shp = (extent - 3 * (layout - 1)) / layout;
+    if (_all_V_(field[[0]] != field[[1]])) {
+        pos[[1]] = shp - 1;
+    }
 
-  field = { [i] -> selection[[i]] / (shp + 3)};
-  pos = { [i] -> selection[[i]] - 3 * field[[i]] - field[[i]] * shp};
-
-  if (all( field[[0]] != field[[1]])) {
-    pos[[1]] = shp - 1;
-  } 
-
-  return( field[[0]], pos);
+    return (field[[0]], pos);
 }
