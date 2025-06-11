@@ -9,7 +9,6 @@ SET (DLL_BUILD_DIR "${PROJECT_BINARY_DIR}/lib")
 # For what targets we build modules
 SET (TARGETS    seq seq_checks mt_pth CACHE STRING "Build for these targets")
 SET (SAC2C_EXEC                       CACHE STRING "Path to sac2c compiler")
-OPTION (BUILDGENERIC "Do not use architecture specific optimisations (useful for package builds)" OFF)
 
 # Check whether sac2c is operational
 INCLUDE ("cmake-common/check-sac2c.cmake")
@@ -23,20 +22,7 @@ FIND_PACKAGE (X11 REQUIRED)
 
 SET (SAC2C_EXTRA_INC "-I${SDL_INCLUDE_DIR}" "-I${X11_INCLUDE_DIR}"
      CACHE STRING "Extra include files that should be used by sac2c")
-
 SET (SAC2C_CPP_INC "-Xl" "-lX11" "-Xtl" "-lX11")
-
-# if building generically, we need to make sure sac2c supports this
-IF (BUILDGENERIC)
-    CHECK_SAC2C_SUPPORT_FLAG ("generic" "-generic")
-    IF (HAVE_FLAG_generic)
-        LIST (APPEND SAC2C_CPP_INC "-generic")
-        MESSAGE (STATUS "Building with *no* system-specific optimisations.")
-    ELSE ()
-        MESSAGE (STATUS "Generic-build disabled as sac2c does not support this!")
-        SET (BUILDGENERIC OFF)
-    ENDIF ()
-ENDIF ()
 
 # For every target run CMakeLists.txt in src
 FOREACH (TARGET IN ITEMS ${TARGETS})
