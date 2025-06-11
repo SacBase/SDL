@@ -14,15 +14,18 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
-      - name: Install sac2c-basic
+      - name: Install SaC
         run: |
           wget ${BASE_URL}/Ubl22/sac2c-basic.deb
           sudo apt install ./sac2c-basic.deb
           sac2c -V
-      - name: Install stdlib-basic
+      - name: Install Stdlib
         run: |
           wget ${BASE_URL}/Ubl22/stdlib-basic.deb
           sudo apt install ./stdlib-basic.deb
+      - name: Install SDL
+        run: |
+          sudo apt install -y libsdl2-dev libsdl2-image libsdl2-ttf
       - name: Create build dir
         run: |
           cmake -E make_directory ${{runner.workspace}}/build
@@ -49,15 +52,18 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
-      - name: Install sac2c-basic
+      - name: Install SaC
         run: |
           wget ${BASE_URL}/MacOS_x86/sac2c-basic.pkg
           sudo installer -pkg ./sac2c-basic.pkg -target /
           sac2c -V
-      - name: Install stdlib-basic
+      - name: Install Stdlib
         run: |
           wget ${BASE_URL}/MacOS_x86/stdlib-basic.pkg
           sudo installer -pkg ./stdlib-basic.pkg -target /
+      - name: Install SDL
+        run: |
+          brew install -y SDL2 SDL2_image SDL2_ttf
       - name: Create build dir
         run: |
           cmake -E make_directory ${{runner.workspace}}/build
@@ -88,15 +94,18 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
-      - name: Install sac2c-basic
+      - name: Install SaC
         run: |
           wget ${BASE_URL}/MacOS_arm64/sac2c-basic.pkg
           sudo installer -pkg ./sac2c-basic.pkg -target /
           sac2c -V
-      - name: Install stdlib-basic
+      - name: Install Stdlib
         run: |
           wget ${BASE_URL}/MacOS_arm64/stdlib-basic.pkg
           sudo installer -pkg ./stdlib-basic.pkg -target /
+      - name: Install SDL
+        run: |
+          brew install -y SDL2 SDL2_image SDL2_ttf
       - name: Create build dir
         run: |
           cmake -E make_directory ${{runner.workspace}}/build
