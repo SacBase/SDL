@@ -21,12 +21,12 @@ jobs:
           sudo apt install -y libsdl1.2-dev libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
       - name: Install SaC
         run: |
-          wget ${BASE_URL}/Ubl22/sac2c-basic.deb
+          wget -q ${BASE_URL}/Ubl22/sac2c-basic.deb
           sudo apt install ./sac2c-basic.deb
           sac2c -V
       - name: Install Stdlib
         run: |
-          wget ${BASE_URL}/Ubl22/stdlib-basic.deb
+          wget -q ${BASE_URL}/Ubl22/stdlib-basic.deb
           sudo apt install ./stdlib-basic.deb
       - name: Create build dir
         run: |
