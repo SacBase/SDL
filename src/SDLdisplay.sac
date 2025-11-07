@@ -1,14 +1,18 @@
-class SDLdisplay;
-
-external classtype;
+module SDLdisplay;
 
 export all;
 
-external SDLdisplay initDisplay(int w, int h);
+external void initDisplay(int w, int h);
     #pragma effect World::TheWorld
     #pragma linkobj "src/sdl3.o"
     #pragma linkwith "SDL3"
 
-external void closeDisplay(SDLdisplay disp);
+external void drawPixel(int x, int y, int r, int g, int b);
+    #pragma effect World::TheWorld
+    #pragma linkobj "src/sdl3.o"
+    #pragma linkwith "SDL3"
+
+external void closeDisplay();
+    #pragma effect World::TheWorld
     #pragma linkobj "src/sdl3.o"
     #pragma linkwith "SDL3"

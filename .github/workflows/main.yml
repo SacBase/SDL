@@ -1,6 +1,6 @@
 name: Build On Changes
 
-on: [push, pull_request]
+on: [pull_request]
 
 env:
   BASE_URL: https://gitlab.sac-home.org/sac-group/sac-packages/-/raw/master/latest/weekly

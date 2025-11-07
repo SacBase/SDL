@@ -3,9 +3,10 @@ use StdIO: all;
 
 int main() {
     printf("Hello, world!\n");
-    disp = initDisplay(640, 480);
+    initDisplay(640, 480);
     printf("Created window\n");
-    closeDisplay(disp);
-    printf("Closed window\n");
+    drawPixel(50,50, 255,255,255);
+    drawPixel(60,60, 0,0,0);
+    closeDisplay();
     return 0;
 }
