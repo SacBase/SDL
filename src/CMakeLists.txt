@@ -5,41 +5,12 @@ ADD_CUSTOM_TARGET (${TARGET}-all-modules ALL)
 
 # C files
 SET (C_DEPS_SRC
-    src/SDL/destroyDisplay.c
-    src/SDL/drawArray.c
-    src/SDL/drawArrayOffset.c
-    src/SDL/drawPixel.c
-    src/SDL/getExtent.c
-    src/SDL/getSelection.c
-    src/SDL/initDisplay.c
-    src/SDL2/close.c
-    src/SDL2/color.c
-    src/SDL2/data.c
-    src/SDL2/display.c
-    src/SDL2/draw.c
-    src/SDL2/event.c
-    src/SDL2/extent.c
-    src/SDL2/font.c
-    src/SDL2/init.c
-    src/SDL2/invert.c
-    src/SDL2/line.c
-    src/SDL2/mouse.c
-    src/SDL2/names.c
-    src/SDL2/pixel.c
-    src/SDL2/sem.c
-    src/SDL2/rect.c
-    src/SDL2/resize.c
-    src/SDL2/select.c
-    src/SDL2/setup.c
-    src/SDL2/title.c
-    src/SDL2/update.c
-    src/SDL2/window.c
+    src/sdl3.c
 )
 
 # SaC files
 SET (SAC_SRC
     SDLdisplay.sac
-    SDL2.sac
 )
 
 # For every C source, compile an object file maintaining the right
@@ -92,7 +63,7 @@ FOREACH (name ${SAC_SRC})
 
     ADD_CUSTOM_COMMAND (
         OUTPUT ${mod} ${tree}
-        COMMAND ${SAC2C} -v0 -o ${DLL_BUILD_DIR} "${src}"
+        COMMAND ${SAC2C} -v0 -Xc "\"$(pkg-config --cflags --libs sdl3)\"" -o ${DLL_BUILD_DIR} "${src}"
         WORKING_DIRECTORY "${dir}"
         MAIN_DEPENDENCY "${src}"
         DEPENDS ${deps_list}

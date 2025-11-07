@@ -1,0 +1,11 @@
+use SDLdisplay: all;
+use StdIO: all;
+
+int main() {
+    printf("Hello, world!\n");
+    disp = initDisplay(640, 480);
+    printf("Created window\n");
+    closeDisplay(disp);
+    printf("Closed window\n");
+    return 0;
+}
