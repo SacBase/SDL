@@ -14,6 +14,7 @@ LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-common")
 INCLUDE ("cmake-common/check-sac2c.cmake")
 INCLUDE ("cmake-common/misc-macros.cmake")
 
+SET (SDL_BUILDING_LIBRARY ON)
 FIND_PACKAGE (SDL3 REQUIRED)
 FIND_PACKAGE (X11 REQUIRED)
 

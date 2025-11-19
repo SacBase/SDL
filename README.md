@@ -1,6 +1,11 @@
 SAC SDL Module
 ==============
 
+Note
+----
+
+Due to a bug in the private head manager, requires the `-noPHM` flag.
+
 About
 -----
 

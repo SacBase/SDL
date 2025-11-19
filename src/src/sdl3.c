@@ -1,108 +1,113 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
+#include <X11/Xlib.h>
 
-//#include "sac.h"
+#include "sac.h"
+#include "sacinterface.h"
 
-SDL_Window *window = NULL;
-SDL_Surface *surface = NULL;
-SDL_Mutex *mutex = NULL;
+typedef struct SDLcontext {
+    int width, height;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    SDL_Mutex *mutex;
+} SDLcontext;
 
-// typedef struct SDLdisplay {
-//     SDL_Window *window;
-//     SDL_Renderer *renderer;
-//     SDL_Surface *surface;
-//     SDL_Mutex *mutex;
-// } SDLdisplay;
-
-void initDisplay(int w, int h)
+SDLcontext *initDisplay(int width, int height)
 {
-    assert(window == NULL);
-    assert(surface == NULL);
-    assert(mutex == NULL);
+    SDLcontext *ctx = (SDLcontext *)malloc(sizeof(SDLcontext));
+    ctx->width = width;
+    ctx->height = height;
+
+    // Fix for using SDL with X-forwarding over SSH
+    XInitThreads();
 
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
-        printf("SDL_Init failed: %s\n", SDL_GetError());
+        SAC_RuntimeError("SDL_Init failed: %s", SDL_GetError());
     }
 
-    printf("a\n");
-    window = SDL_CreateWindow("SDL3", w, h, 0);
-    if(window == NULL)
+    if(!SDL_CreateWindowAndRenderer("SaC SDL3", width, height, 0, &ctx->window, &ctx->renderer))
     {
-        printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
+        SAC_RuntimeError("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());
     }
 
-    printf("b\n");
-
-    assert(window != NULL);
-    surface = SDL_GetWindowSurface(window);
-    if(surface == NULL)
+    ctx->texture = SDL_CreateTexture(ctx->renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
+    if(ctx->texture == NULL)
     {
-        printf("SDL_GetWindowSurface failed: %s\n", SDL_GetError());
+        SAC_RuntimeError("SDL_CreateTexture failed: %s", SDL_GetError());
     }
 
-    SDL_ClearSurface(surface, 0., 0., 120., 255.);
-    SDL_UpdateWindowSurface(window);
+    uint32_t *pixels = (uint32_t *)malloc(width * height * sizeof(uint32_t));
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint8_t r = (x % 2) * 255;
+            uint8_t g = (y % 2) * 255;
+            uint8_t b = ((x + y) % 2) * 255;
+            uint8_t a = 255;
+            pixels[x + y * width] = (r << 0) | (g << 8) | (b << 16) | (a << 24);
+        }
+    }
 
-    printf("c\n");
+    SDL_UpdateTexture(ctx->texture, NULL, pixels, width * sizeof(uint32_t));
+    free(pixels);
 
+    SDL_RenderClear(ctx->renderer);
+    SDL_RenderTexture(ctx->renderer, ctx->texture, NULL, NULL);
+    SDL_RenderPresent(ctx->renderer);
 
-
-    SDL_Delay(2000);
-
-    mutex = SDL_CreateMutex();
-    if(mutex == NULL)
+    ctx->mutex = SDL_CreateMutex();
+    if(ctx->mutex == NULL)
     {
         printf("SDL_CreateMutex failed: %s\n", SDL_GetError());
     }
 
-    SDL_Delay(2000);
+    SAC_Print ("Created %dx%d SDL3 display\n", width, height);
+    return ctx;
 }
 
-void drawPixel(int x, int y, int r, int g, int b)
+void drawScreen(SDLcontext *ctx, SACarg *sa_pixels)
 {
-    printf("drawing pixel at %d %d\n", x, y);
+    assert(SACARGgetDim(sa_pixels) == 3);
+    assert(SACARGgetShape(sa_pixels, 0) == ctx->width);
+    assert(SACARGgetShape(sa_pixels, 1) == ctx->height);
+    assert(SACARGgetShape(sa_pixels, 2) == 3);
 
-    SDL_LockMutex(mutex);
+    SDL_LockMutex(ctx->mutex);
 
-    if (SDL_MUSTLOCK(surface)) {
-        if (!SDL_LockSurface(surface)) {
-            printf("SDL_LockSurface failed: %s\n", SDL_GetError());
+    const int *sa_pixel_data = SACARGgetSharedData(SACTYPE__MAIN__int, sa_pixels);
+
+    uint32_t *pixels = (uint32_t *)malloc(ctx->width * ctx->height * sizeof(uint32_t));
+    for (int i = 0, y = 0; y < ctx->height; y++) {
+        for (int x = 0; x < ctx->width; x++, i++) {
+            uint8_t r = sa_pixel_data[3 * i + 0];
+            uint8_t g = sa_pixel_data[3 * i + 1];
+            uint8_t b = sa_pixel_data[3 * i + 2];
+            uint8_t a = 255;
+            pixels[i] = (r << 0) | (g << 8) | (b << 16) | (a << 24);
         }
     }
 
-    int yoffset = x * (surface->pitch / 4);
-    int xoffset = y;
+    SDL_UpdateTexture(ctx->texture, NULL, pixels, ctx->width * sizeof(uint32_t));
+    free(pixels);
 
-    Uint32 *bptr = (Uint32 *) (surface->pixels) + xoffset + yoffset;
-    *bptr = r << 16 | g << 8 | b;
+    SDL_RenderClear(ctx->renderer);
+    SDL_RenderTexture(ctx->renderer, ctx->texture, NULL, NULL);
+    SDL_RenderPresent(ctx->renderer);
 
-    if (SDL_MUSTLOCK(surface)) {
-        SDL_UnlockSurface(surface);
-    }
+    SDL_Delay(5000);
 
-    SDL_UpdateWindowSurface(window);
-
-    SDL_UnlockMutex(mutex);
+    SDL_UnlockMutex(ctx->mutex);
 }
 
-
-void closeDisplay(void)
+void closeDisplay(SDLcontext *ctx)
 {
-    printf("SDL_Quit\n");
+    printf("Closing %dx%d SDL3 display\n", ctx->width, ctx->height);
+    SDL_DestroyMutex(ctx->mutex);
+    SDL_DestroyTexture(ctx->texture);
+    SDL_DestroyRenderer(ctx->renderer);
+    SDL_DestroyWindow(ctx->window);
     SDL_Quit();
 }
-
-#if 0
-int main()
-{
-    initDisplay(640, 480);
-    printf("Created window\n");
-    drawPixel(50,50, 255,255,255);
-    drawPixel(60,60, 0,0,0);
-    closeDisplay();
-    return 0;
-}
-#endif
