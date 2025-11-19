@@ -52,7 +52,7 @@ SDLcontext *initDisplay(int width, int height)
     }
 
     SDL_UpdateTexture(ctx->texture, NULL, pixels, width * sizeof(uint32_t));
-    free(pixels);
+    //free(pixels);
 
     SDL_RenderClear(ctx->renderer);
     SDL_RenderTexture(ctx->renderer, ctx->texture, NULL, NULL);
@@ -79,7 +79,13 @@ void drawScreen(SDLcontext *ctx, SACarg *sa_pixels)
 
     const int *sa_pixel_data = SACARGgetSharedData(SACTYPE__MAIN__int, sa_pixels);
 
-    uint32_t *pixels = (uint32_t *)malloc(ctx->width * ctx->height * sizeof(uint32_t));
+    uint32_t *pixels;
+    int pitch;
+    if (!SDL_LockTexture(ctx->texture, NULL, (void **)&pixels, &pitch)) {
+        SAC_RuntimeError("SDL_LockTexture failed: %s", SDL_GetError());
+    }
+    assert(pitch == ctx->width * sizeof(uint32_t));
+
     for (int i = 0, y = 0; y < ctx->height; y++) {
         for (int x = 0; x < ctx->width; x++, i++) {
             uint8_t r = sa_pixel_data[3 * i + 0];
@@ -90,8 +96,7 @@ void drawScreen(SDLcontext *ctx, SACarg *sa_pixels)
         }
     }
 
-    SDL_UpdateTexture(ctx->texture, NULL, pixels, ctx->width * sizeof(uint32_t));
-    free(pixels);
+    SDL_UnlockTexture(ctx->texture);
 
     SDL_RenderClear(ctx->renderer);
     SDL_RenderTexture(ctx->renderer, ctx->texture, NULL, NULL);
