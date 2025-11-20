@@ -102,10 +102,12 @@ void SAC_DrawPixels(SDLcontext *ctx, SACarg *sa_pixels)
 
 int SAC_CloseDisplay(SDLcontext *ctx)
 {
-    SDL_Event quitEvent;
-    quitEvent.type = SDL_EVENT_QUIT;
-    if (!SDL_PushEvent(&quitEvent)) {
-        SAC_RuntimeError("SDL_PushEvent failed: %s", SDL_GetError());
+    if (ctx->running) {
+        SDL_Event quitEvent;
+        quitEvent.type = SDL_EVENT_QUIT;
+        if (!SDL_PushEvent(&quitEvent)) {
+            SAC_RuntimeError("SDL_PushEvent failed: %s", SDL_GetError());
+        }
     }
 
     int exitStatus;
