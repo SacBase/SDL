@@ -70,23 +70,25 @@ int main() {
 
     ctx = initDisplay(YRES, XRES);
 
-    cmin = toc(-2.2,  1.0);
-    cmax = toc( 0.8, -1.0);
-    arr = genComplexArray(YRES, XRES, cmin, cmax);
+    while (isRunning(ctx)) {
+        cmin = toc(-2.2,  1.0);
+        cmax = toc( 0.8, -1.0);
+        arr = genComplexArray(YRES, XRES, cmin, cmax);
 
-    ts, vs = escapeTimeAndValue(arr, DEPTH);
+        ts, vs = escapeTimeAndValue(arr, DEPTH);
 
-#if 1
-    rgb = intToMonochrome(ts);
-#else
-    nvs = normalizeIterationCount(ts, vs);
-    rgb = doubleToRgb(nvs);
-#endif
+        #if 1
+        rgb = intToMonochrome(ts);
+        #else
+        nvs = normalizeIterationCount(ts, vs);
+        rgb = doubleToRgb(nvs);
+        #endif
 
-    rgb = Color8::toi(rgb);
-    ctx = drawPixels(ctx, rgb);
+        rgb = Color8::toi(rgb);
+        ctx = drawPixels(ctx, rgb);
 
-    _ = sleep(5ui);
+        _ = sleep(1ui);
+    }
 
     status = closeDisplay(ctx);
     return status;

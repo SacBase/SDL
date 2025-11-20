@@ -4,22 +4,11 @@
 #include <SDL3/SDL.h>
 #include <X11/Xlib.h>
 
-#include "sac.h"
-#include "sacinterface.h"
+#include "sdl3.h"
 
-typedef struct SDLcontext {
-    int width, height;
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Texture *texture;
-} SDLcontext;
-
-static void SAC_EventHandler(void *data)
+static int SAC_EventHandler(SDLcontext *ctx)
 {
-    SDL_Window *window = (SDL_Window *)data;
-    bool running = true;
-
-    while (running) {
+    while (ctx->running) {
         SDL_Event event;
 
         if (!SDL_WaitEvent(&event)) {
@@ -28,7 +17,7 @@ static void SAC_EventHandler(void *data)
 
         switch (event.type) {
             case SDL_EVENT_QUIT:
-                running = false;
+                ctx->running = false;
                 break;
 
             default:
@@ -37,8 +26,7 @@ static void SAC_EventHandler(void *data)
     }
 
     printf("SDL quit event received\n");
-    SDL_DestroyWindow(window);
-    exit(0);
+    return 0;
 }
 
 SDLcontext *SAC_InitDisplay(int height, int width)
@@ -46,6 +34,7 @@ SDLcontext *SAC_InitDisplay(int height, int width)
     SDLcontext *ctx = (SDLcontext *)malloc(sizeof(SDLcontext));
     ctx->width = width;
     ctx->height = height;
+    ctx->running = true;
 
     // Fix for using SDL with X-forwarding over SSH
     XInitThreads();
@@ -63,8 +52,8 @@ SDLcontext *SAC_InitDisplay(int height, int width)
         SAC_RuntimeError("SDL_CreateTexture failed: %s", SDL_GetError());
     }
 
-    SDL_Thread *t = SDL_CreateThread(SAC_EventHandler, "SAC_EventHandler", (void *)ctx->window);
-    if (t == NULL) {
+    ctx->eventHandler = SDL_CreateThread(SAC_EventHandler, "SAC_EventHandler", ctx);
+    if (ctx->eventHandler == NULL) {
         SAC_RuntimeError("SDL_CreateThread failed: %s", SDL_GetError());
     }
 
@@ -104,11 +93,33 @@ void SAC_DrawPixels(SDLcontext *ctx, SACarg *sa_pixels)
     SDL_RenderPresent(ctx->renderer);
 }
 
+/// Wait for a selection of the user
+/// Returns an int[2,2] of the form: [[xmin,ymin], [xmax,ymax]]
+//SACarg *SAC_GetSelection(SDLcontext *ctx)
+//{
+//    return SACARGcreateFromPointer (SACTYPE__MAIN__int, (void *)zoomCoords, 2, 2, 2);
+//}
+
 int SAC_CloseDisplay(SDLcontext *ctx)
 {
+    SDL_Event quitEvent;
+    quitEvent.type = SDL_EVENT_QUIT;
+    if (!SDL_PushEvent(&quitEvent)) {
+        SAC_RuntimeError("SDL_PushEvent failed: %s", SDL_GetError());
+    }
+
+    int exitStatus;
+    SDL_WaitThread(ctx->eventHandler, &exitStatus);
+
     SDL_DestroyTexture(ctx->texture);
     SDL_DestroyRenderer(ctx->renderer);
     SDL_DestroyWindow(ctx->window);
     SDL_Quit();
-    return 0;
+
+    return exitStatus;
+}
+
+bool SAC_IsRunning(SDLcontext *ctx)
+{
+    return (ctx)->running;
 }
