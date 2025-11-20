@@ -1,0 +1,93 @@
+use SDLdisplay: all;
+use Structures: all;
+use Numerical: { log2 };
+
+external uint sleep(uint x);
+    #pragma effect World::TheWorld
+    #pragma linksign [0,1]
+    #pragma linkname "sleep"
+    #pragma header "<unistd.h>"
+
+inline
+complex[yres,xres] genComplexArray(int yres, int xres,
+                                   complex cmin, complex cmax)
+{
+    dR = real(cmax) - real(cmin);
+    dI = imag(cmax) - imag(cmin);
+    return { [y,x] -> cmin + toc((tod(x) / tod(xres)) * dR,
+                                 (tod(y) / tod(yres)) * dI)
+           | [y,x] < [yres,xres] };
+}
+
+inline
+int, complex escapeTimeAndValue(complex c, int depth)
+{
+    time = 0;
+    z = c;
+
+    while (time < depth && normSq(z) <= 4d) {
+        z = z * z + c;
+        time += 1;
+    }
+
+    return (time, z);
+}
+
+inline
+int[2:shp], complex[2:shp] escapeTimeAndValue(complex[2:shp] arr, int depth)
+{
+    ts, vs = { iv -> escapeTimeAndValue(arr[iv], depth) };
+    return (ts, vs);
+}
+
+inline
+double[2:shp] normalizeIterationCount(int[2:shp] ts, complex[2:shp] vs)
+{
+    return where(normSq(vs) <= 4d,
+                 0d,
+                 tod(ts + 1) - log2(log2(norm(vs))));
+}
+
+inline
+Color8[2:shp] intToMonochrome(int[2:shp] arr)
+{
+    scaled_vals = (arr * 255) / maxval(arr);
+    clut = genLogarithmicClut(0.4d, 0.9d, white(), black());
+    return { iv -> clut[scaled_vals[iv]] };
+}
+
+inline
+Color8[2:shp] doubleToRgb(double[2:shp] arr)
+{
+    scaled_vals = toi((arr * 360d) / maxval(arr));
+    return Hsb2Rgb(scaled_vals, 60, 80);
+}
+
+int main() {
+    XRES = 640;
+    YRES = 480;
+    DEPTH = 2048;
+
+    ctx = initDisplay(YRES, XRES);
+
+    cmin = toc(-2.2,  1.0);
+    cmax = toc( 0.8, -1.0);
+    arr = genComplexArray(YRES, XRES, cmin, cmax);
+
+    ts, vs = escapeTimeAndValue(arr, DEPTH);
+
+#if 1
+    rgb = intToMonochrome(ts);
+#else
+    nvs = normalizeIterationCount(ts, vs);
+    rgb = doubleToRgb(nvs);
+#endif
+
+    rgb = Color8::toi(rgb);
+    ctx = drawPixels(ctx, rgb);
+
+    _ = sleep(5ui);
+
+    status = closeDisplay(ctx);
+    return status;
+}

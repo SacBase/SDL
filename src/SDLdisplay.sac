@@ -4,21 +4,21 @@ external classtype;
 
 export all;
 
-external SDLdisplay initDisplay(int w, int h);
-    #pragma effect World::TheWorld
+external SDLdisplay initDisplay(int h, int w);
+    #pragma linkname "SAC_InitDisplay"
     #pragma linkobj "src/sdl3.o"
     #pragma linkwith "SDL3"
     #pragma linksign [0,1,2]
 
-external SDLdisplay drawScreen(SDLdisplay ctx, int[w,h,3] pixels);
-    #pragma effect World::TheWorld
+external SDLdisplay drawPixels(SDLdisplay ctx, int[h,w,3] pixels);
+    #pragma linkname "SAC_DrawPixels"
     #pragma linkobj "src/sdl3.o"
     #pragma linkwith "SDL3"
     #pragma linksign [1,1,2]
     #pragma sacarg [2]
 
-external void closeDisplay(SDLdisplay ctx);
-    #pragma effect World::TheWorld
+external int closeDisplay(SDLdisplay ctx);
+    #pragma linkname "SAC_CloseDisplay"
     #pragma linkobj "src/sdl3.o"
     #pragma linkwith "SDL3"
-    #pragma linksign [1]
+    #pragma linksign [0,1]
