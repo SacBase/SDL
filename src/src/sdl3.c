@@ -20,13 +20,33 @@ static int SAC_EventHandler(SDLcontext *ctx)
                 ctx->running = false;
                 break;
 
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                if (event.button.button == 1 && ctx->selectionMode == SEL_from) {
+                    ctx->selectionCoords[0] = event.button.x;
+                    ctx->selectionCoords[1] = event.button.y;
+                    ctx->selectionMode = SEL_to;
+                }
+                break;
+
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+                if (event.button.button == 1 && ctx->selectionMode == SEL_to) {
+                    ctx->selectionCoords[2] = event.button.x;
+                    ctx->selectionCoords[3] = event.button.y;
+                    ctx->selectionMode = SEL_none;
+                    SDL_SignalSemaphore(ctx->waitForSelection);
+                }
+                break;
+
             default:
                 break;
         }
     }
 
-    printf("SDL quit event received\n");
-    return 0;
+    SDL_DestroyTexture(ctx->texture);
+    SDL_DestroyRenderer(ctx->renderer);
+    SDL_DestroyWindow(ctx->window);
+    SDL_Quit();
+    exit(0);
 }
 
 SDLcontext *SAC_InitDisplay(int height, int width)
@@ -55,6 +75,11 @@ SDLcontext *SAC_InitDisplay(int height, int width)
     ctx->eventHandler = SDL_CreateThread(SAC_EventHandler, "SAC_EventHandler", ctx);
     if (ctx->eventHandler == NULL) {
         SAC_RuntimeError("SDL_CreateThread failed: %s", SDL_GetError());
+    }
+
+    ctx->waitForSelection = SDL_CreateSemaphore(0);
+    if (ctx->waitForSelection == NULL) {
+        SAC_RuntimeError("SDL_CreateSemaphore failed: %s", SDL_GetError());
     }
 
     SDL_RenderClear(ctx->renderer);
@@ -93,16 +118,31 @@ void SAC_DrawPixels(SDLcontext *ctx, SACarg *sa_pixels)
     SDL_RenderPresent(ctx->renderer);
 }
 
-/// Wait for a selection of the user
-/// Returns an int[2,2] of the form: [topleft, bottomright] = [[ymin,xmin], [ymax,xmax]]
 SACarg *SAC_GetSelection(SDLcontext *ctx)
 {
-    int *zoomCoords = malloc(4 * sizeof (int));
-    zoomCoords[0] = 0;
-    zoomCoords[1] = 0;
-    zoomCoords[2] = 0;
-    zoomCoords[3] = 0;
-    return SACARGcreateFromPointer (SACTYPE__MAIN__int, (void *)zoomCoords, 2, 2, 2);
+    ctx->selectionMode = SEL_from;
+
+    SDL_WaitSemaphore(ctx->waitForSelection);
+    assert(ctx->selectionMode == SEL_none);
+
+    int *res = malloc(4 * sizeof(int));
+    // Ensure coordinates are [topleft, bottomright] and each of the form [y,x]
+    if (ctx->selectionCoords[0] <= ctx->selectionCoords[2]) {
+        res[1] = ctx->selectionCoords[0];
+        res[3] = ctx->selectionCoords[2];
+    } else {
+        res[1] = ctx->selectionCoords[2];
+        res[3] = ctx->selectionCoords[0];
+    }
+    if (ctx->selectionCoords[1] <= ctx->selectionCoords[3]) {
+        res[0] = ctx->selectionCoords[1];
+        res[2] = ctx->selectionCoords[3];
+    } else {
+        res[0] = ctx->selectionCoords[3];
+        res[2] = ctx->selectionCoords[1];
+    }
+
+    return SACARGcreateFromPointer(SACTYPE__MAIN__int, (void *)res, 2, 2, 2);
 }
 
 int SAC_CloseDisplay(SDLcontext *ctx)

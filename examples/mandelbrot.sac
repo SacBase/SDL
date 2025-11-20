@@ -69,11 +69,11 @@ int main() {
     DEPTH = 2048;
 
     ctx = initDisplay(YRES, XRES);
+    cmin = [toc(-2.2,  1.0)];
+    cmax = [toc( 0.8, -1.0)];
 
     while (isRunning(ctx)) {
-        cmin = toc(-2.2,  1.0);
-        cmax = toc( 0.8, -1.0);
-        arr = genComplexArray(YRES, XRES, cmin, cmax);
+        arr = genComplexArray(YRES, XRES, cmin[0], cmax[0]);
 
         ts, vs = escapeTimeAndValue(arr, DEPTH);
 
@@ -87,7 +87,15 @@ int main() {
         rgb = Color8::toi(rgb);
         ctx = drawPixels(ctx, rgb);
 
-        zoom_coords, ctx = getSelection(ctx);
+        zoomCoords, ctx = getSelection(ctx);
+        if (all(zoomCoords >= 0)) {
+            cmin = [arr[zoomCoords[0]]] ++ cmin;
+            cmax = [arr[zoomCoords[1]]] ++ cmax;
+        } else if (shape(cmin)[0] > 1) {
+            // Undo the last selection, if any
+            cmin = drop([1], cmin);
+            cmax = drop([1], cmax);
+        }
     }
 
     status = closeDisplay(ctx);

@@ -7,6 +7,12 @@
 #include "sac.h"
 #include "sacinterface.h"
 
+typedef enum {
+    SEL_none,
+    SEL_from,
+    SEL_to,
+} selmode_t;
+
 typedef struct SDLcontext {
     bool running;
     int width, height;
@@ -14,6 +20,9 @@ typedef struct SDLcontext {
     SDL_Renderer *renderer;
     SDL_Texture *texture;
     SDL_Thread *eventHandler;
+    SDL_Semaphore *waitForSelection;
+    int selectionCoords[4];
+    selmode_t selectionMode;
 } SDLcontext;
 
 extern SDLcontext *SAC_InitDisplay(int height, int width);
