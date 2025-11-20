@@ -17,6 +17,13 @@ external SDLdisplay drawPixels(SDLdisplay ctx, int[h,w,3] pixels);
     #pragma linksign [1,1,2]
     #pragma sacarg [2]
 
+external int[2,2], SDLdisplay getSelection(SDLdisplay ctx);
+    #pragma linkname "SAC_GetSelection"
+    #pragma linkobj "src/sdl3.o"
+    #pragma linkwith "SDL3"
+    #pragma linksign [0,1,1]
+    #pragma sacarg [0]
+
 external bool isRunning(SDLdisplay &ctx);
     #pragma linkname "SAC_IsRunning"
     #pragma linkobj "src/sdl3.o"

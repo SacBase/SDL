@@ -87,7 +87,7 @@ int main() {
         rgb = Color8::toi(rgb);
         ctx = drawPixels(ctx, rgb);
 
-        _ = sleep(1ui);
+        zoom_coords, ctx = getSelection(ctx);
     }
 
     status = closeDisplay(ctx);

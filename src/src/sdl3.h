@@ -18,6 +18,7 @@ typedef struct SDLcontext {
 
 extern SDLcontext *SAC_InitDisplay(int height, int width);
 extern void SAC_DrawPixels(SDLcontext *ctx, SACarg *sa_pixels);
+extern SACarg *SAC_GetSelection(SDLcontext *ctx);
 extern int SAC_CloseDisplay(SDLcontext *ctx);
 extern bool SAC_IsRunning(SDLcontext *ctx);
 

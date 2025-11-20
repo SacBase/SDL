@@ -94,11 +94,16 @@ void SAC_DrawPixels(SDLcontext *ctx, SACarg *sa_pixels)
 }
 
 /// Wait for a selection of the user
-/// Returns an int[2,2] of the form: [[xmin,ymin], [xmax,ymax]]
-//SACarg *SAC_GetSelection(SDLcontext *ctx)
-//{
-//    return SACARGcreateFromPointer (SACTYPE__MAIN__int, (void *)zoomCoords, 2, 2, 2);
-//}
+/// Returns an int[2,2] of the form: [topleft, bottomright] = [[ymin,xmin], [ymax,xmax]]
+SACarg *SAC_GetSelection(SDLcontext *ctx)
+{
+    int *zoomCoords = malloc(4 * sizeof (int));
+    zoomCoords[0] = 0;
+    zoomCoords[1] = 0;
+    zoomCoords[2] = 0;
+    zoomCoords[3] = 0;
+    return SACARGcreateFromPointer (SACTYPE__MAIN__int, (void *)zoomCoords, 2, 2, 2);
+}
 
 int SAC_CloseDisplay(SDLcontext *ctx)
 {
