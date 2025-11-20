@@ -1,12 +1,7 @@
 use SDLdisplay: all;
 use Structures: all;
 use Numerical: { log2 };
-
-external uint sleep(uint x);
-    #pragma effect World::TheWorld
-    #pragma linksign [0,1]
-    #pragma linkname "sleep"
-    #pragma header "<unistd.h>"
+use StdIO: all;
 
 inline
 complex[yres,xres] genComplexArray(int yres, int xres,
@@ -87,12 +82,15 @@ int main() {
         rgb = Color8::toi(rgb);
         ctx = drawPixels(ctx, rgb);
 
+        printf("Waiting for selection...\n");
         zoomCoords, ctx = getSelection(ctx);
         if (all(zoomCoords >= 0)) {
+            printf("Received selection [[%d,%d],[%d,%d]]\n", zoomCoords[0,0], zoomCoords[0,1], zoomCoords[1,0], zoomCoords[1,1]);
             cmin = [arr[zoomCoords[0]]] ++ cmin;
             cmax = [arr[zoomCoords[1]]] ++ cmax;
         } else if (shape(cmin)[0] > 1) {
             // Undo the last selection, if any
+            printf("Undo last selection\n");
             cmin = drop([1], cmin);
             cmax = drop([1], cmax);
         }

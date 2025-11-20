@@ -21,7 +21,7 @@ static int SAC_EventHandler(SDLcontext *ctx)
                 break;
 
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                if (event.button.button == 1 && ctx->selectionMode == SEL_from) {
+                if (event.button.button == SDL_BUTTON_LEFT && ctx->selectionMode == SEL_from) {
                     ctx->selectionCoords[0] = event.button.x;
                     ctx->selectionCoords[1] = event.button.y;
                     ctx->selectionMode = SEL_to;
@@ -29,9 +29,18 @@ static int SAC_EventHandler(SDLcontext *ctx)
                 break;
 
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                if (event.button.button == 1 && ctx->selectionMode == SEL_to) {
+                if (event.button.button == SDL_BUTTON_LEFT && ctx->selectionMode == SEL_to) {
                     ctx->selectionCoords[2] = event.button.x;
                     ctx->selectionCoords[3] = event.button.y;
+                    ctx->selectionMode = SEL_none;
+                    SDL_SignalSemaphore(ctx->waitForSelection);
+                }
+                // Undo selection if the right mouse button was pressed
+                if (event.button.button == SDL_BUTTON_RIGHT && ctx->selectionMode != SEL_none) {
+                    ctx->selectionCoords[0] = -1;
+                    ctx->selectionCoords[1] = -1;
+                    ctx->selectionCoords[2] = -1;
+                    ctx->selectionCoords[3] = -1;
                     ctx->selectionMode = SEL_none;
                     SDL_SignalSemaphore(ctx->waitForSelection);
                 }
@@ -121,7 +130,6 @@ void SAC_DrawPixels(SDLcontext *ctx, SACarg *sa_pixels)
 SACarg *SAC_GetSelection(SDLcontext *ctx)
 {
     ctx->selectionMode = SEL_from;
-
     SDL_WaitSemaphore(ctx->waitForSelection);
     assert(ctx->selectionMode == SEL_none);
 
