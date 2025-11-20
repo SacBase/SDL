@@ -14,6 +14,33 @@ typedef struct SDLcontext {
     SDL_Texture *texture;
 } SDLcontext;
 
+static void SAC_EventHandler(void *data)
+{
+    SDL_Window *window = (SDL_Window *)data;
+    bool running = true;
+
+    while (running) {
+        SDL_Event event;
+
+        if (!SDL_WaitEvent(&event)) {
+            SAC_RuntimeError("SDL_WaitEvent failed: %s", SDL_GetError());
+        }
+
+        switch (event.type) {
+            case SDL_EVENT_QUIT:
+                running = false;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    printf("SDL quit event received\n");
+    SDL_DestroyWindow(window);
+    exit(0);
+}
+
 SDLcontext *SAC_InitDisplay(int height, int width)
 {
     SDLcontext *ctx = (SDLcontext *)malloc(sizeof(SDLcontext));
@@ -34,6 +61,11 @@ SDLcontext *SAC_InitDisplay(int height, int width)
     ctx->texture = SDL_CreateTexture(ctx->renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, width, height);
     if(ctx->texture == NULL) {
         SAC_RuntimeError("SDL_CreateTexture failed: %s", SDL_GetError());
+    }
+
+    SDL_Thread *t = SDL_CreateThread(SAC_EventHandler, "SAC_EventHandler", (void *)ctx->window);
+    if (t == NULL) {
+        SAC_RuntimeError("SDL_CreateThread failed: %s", SDL_GetError());
     }
 
     SDL_RenderClear(ctx->renderer);
