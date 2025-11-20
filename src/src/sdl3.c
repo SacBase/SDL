@@ -96,14 +96,14 @@ SDLcontext *SAC_InitDisplay(int height, int width)
     return ctx;
 }
 
-void SAC_DrawPixels(SDLcontext *ctx, SACarg *sa_pixels)
+void SAC_DrawPixels(SDLcontext *ctx, SACarg *pixel_data)
 {
-    assert(SACARGgetDim(sa_pixels) == 3);
-    assert(SACARGgetShape(sa_pixels, 0) == ctx->height);
-    assert(SACARGgetShape(sa_pixels, 1) == ctx->width);
-    assert(SACARGgetShape(sa_pixels, 2) == 3);
+    assert(SACARGgetDim(pixel_data) == 3);
+    assert(SACARGgetShape(pixel_data, 0) == ctx->height);
+    assert(SACARGgetShape(pixel_data, 1) == ctx->width);
+    assert(SACARGgetShape(pixel_data, 2) == 3);
 
-    const int *src_colors = SACARGgetSharedData(SACTYPE__MAIN__int, sa_pixels);
+    const int *src_pixels = SACARGgetSharedData(SACTYPE__MAIN__int, pixel_data);
 
     uint8_t *dst_pixels;
     int pitch;
@@ -111,16 +111,19 @@ void SAC_DrawPixels(SDLcontext *ctx, SACarg *sa_pixels)
         SAC_RuntimeError("SDL_LockTexture failed: %s", SDL_GetError());
     }
 
-    for (int y = 0; y < ctx->height; y++) {
-        const int *src_row = src_colors + y * ctx->width * 3;
+    for (size_t y = 0; y < ctx->height; y++) {
+        const int *src_row = src_pixels + y * ctx->width * 3;
         uint8_t *dst_row = dst_pixels + y * pitch;
 
-        for (int x = 0; x < 3 * ctx->width; x += 3) {
+        for (size_t x = 0; x < 3 * ctx->width; x += 3) {
             dst_row[x + 0] = (uint8_t)(src_row[x + 0]);
             dst_row[x + 1] = (uint8_t)(src_row[x + 1]);
             dst_row[x + 2] = (uint8_t)(src_row[x + 2]);
         }
     }
+
+    // Clearing should not be necessary since we overwrite the entire texture with non-transparent pixels
+    //SDL_RenderClear(ctx->renderer);
 
     SDL_UnlockTexture(ctx->texture);
     SDL_RenderTexture(ctx->renderer, ctx->texture, NULL, NULL);

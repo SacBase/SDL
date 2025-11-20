@@ -3,84 +3,105 @@ use Structures: all;
 use Numerical: { log2 };
 use StdIO: all;
 
+#define XRES 16
+#define YRES 9
+#define EXPAND 64
+#define DEPTH 1024
+
 inline
-complex[yres,xres] genComplexArray(int yres, int xres,
-                                   complex cmin, complex cmax)
+complex[h,w] genComplexArray(int h, int w, complex cmin, complex cmax)
 {
     dR = real(cmax) - real(cmin);
     dI = imag(cmax) - imag(cmin);
-    return { [y,x] -> cmin + toc((tod(x) / tod(xres)) * dR,
-                                 (tod(y) / tod(yres)) * dI)
-           | [y,x] < [yres,xres] };
+    return { [y,x] -> cmin + toc(tod(x) * dR / tod(w),
+                                 tod(y) * dI / tod(h))
+           | [y,x] < [h,w] };
 }
 
 inline
 int, complex escapeTimeAndValue(complex c, int depth)
 {
-    time = 0;
+    i = 0;
     z = c;
 
-    while (time < depth && normSq(z) <= 4d) {
+    while (i < depth && normSq(z) <= 4d) {
         z = z * z + c;
-        time += 1;
+        i += 1;
     }
 
-    return (time, z);
+    return (i, z);
 }
 
 inline
 int[2:shp], complex[2:shp] escapeTimeAndValue(complex[2:shp] arr, int depth)
 {
-    ts, vs = { iv -> escapeTimeAndValue(arr[iv], depth) };
+    ts, vs = { iv -> escapeTimeAndValue(arr[iv], depth) | iv < shp };
     return (ts, vs);
 }
 
 inline
 double[2:shp] normalizeIterationCount(int[2:shp] ts, complex[2:shp] vs)
 {
-    return where(normSq(vs) <= 4d,
+    return where(norm(vs) <= 2d,
                  0d,
                  tod(ts + 1) - log2(log2(norm(vs))));
 }
 
 inline
-Color8[2:shp] intToMonochrome(int[2:shp] arr)
+Color8[2:shp] doubleToRgb(double[2:shp] arr)
 {
-    scaled_vals = (arr * 255) / maxval(arr);
-    clut = genLogarithmicClut(0.4d, 0.9d, white(), black());
-    return { iv -> clut[scaled_vals[iv]] };
+    min = minval(arr);
+    max = maxval(arr);
+    scaled = (arr - min) / (max - min);
+
+    //return Hsb2Rgb(toi(scaled * 360d), 60, 80);
+
+    scaled = toi(scaled * 255d);
+    clut = genLogarithmicClut( 0.4d, 0.9d, Color8::black(), Color8::red());
+    return { iv -> clut[scaled[iv]] | iv < shp };
 }
 
 inline
-Color8[2:shp] doubleToRgb(double[2:shp] arr)
+Color8[2:shp] intToMonochrome(int[2:shp] a)
 {
-    scaled_vals = toi((arr * 360d) / maxval(arr));
-    return Hsb2Rgb(scaled_vals, 60, 80);
+    clut = genLogarithmicClut( 0.4d, 0.9d, Color8::black(), Color8::red());
+
+    a = (a * 255) / maxval(a);
+
+    return { iv -> clut[ a[ iv] ] };
+}
+
+inline
+Color8[2:oshp] stretchRgb(Color8[2:shp] arr, int stretch)
+{
+    return { iv -> arr[iv / stretch] | iv < shp * stretch };
 }
 
 int main() {
-    XRES = 640;
-    YRES = 480;
-    DEPTH = 2048;
-
-    ctx = initDisplay(YRES, XRES);
-    cmin = [toc(-2.2,  1.0)];
-    cmax = [toc( 0.8, -1.0)];
+    ctx = initDisplay(YRES*EXPAND, XRES*EXPAND);
+    cmin = [toc(-2.2, -1.0)];
+    cmax = [toc( 0.8,  1.0)];
 
     while (isRunning(ctx)) {
-        arr = genComplexArray(YRES, XRES, cmin[0], cmax[0]);
+        xres = XRES;
+        yres = YRES;
+        expand = EXPAND;
 
-        ts, vs = escapeTimeAndValue(arr, DEPTH);
+        do {
+            arr = genComplexArray(yres, xres, cmin[0], cmax[0]);
 
-        #if 1
-        rgb = intToMonochrome(ts);
-        #else
-        nvs = normalizeIterationCount(ts, vs);
-        rgb = doubleToRgb(nvs);
-        #endif
+            ts, vs = escapeTimeAndValue(arr, DEPTH);
 
-        rgb = Color8::toi(rgb);
-        ctx = drawPixels(ctx, rgb);
+            nvs = normalizeIterationCount(ts, vs);
+            rgb = intToMonochrome(ts);
+            //rgb = doubleToRgb(nvs);
+            rgb = stretchRgb(rgb, expand);
+            ctx = drawPixels(ctx, toi(rgb));
+
+            xres *= 2;
+            yres *= 2;
+            expand /= 2;
+        } while (expand > 0);
 
         printf("Waiting for selection...\n");
         zoomCoords, ctx = getSelection(ctx);

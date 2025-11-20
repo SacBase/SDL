@@ -15,7 +15,7 @@ typedef enum {
 
 typedef struct SDLcontext {
     bool running;
-    int width, height;
+    size_t width, height;
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
