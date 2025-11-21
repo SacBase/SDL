@@ -6,6 +6,9 @@
 
 #include "sdl3.h"
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 static int SAC_EventHandler(SDLcontext *ctx)
 {
     while (ctx->running) {
@@ -97,38 +100,40 @@ SDLcontext *SAC_InitDisplay(int height, int width)
     return ctx;
 }
 
-void SAC_DrawPixels(SDLcontext *ctx, SACarg *pixel_data)
+void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, int xOffset, int yOffset)
 {
-    assert(SACARGgetDim(pixel_data) == 3);
-    assert(SACARGgetShape(pixel_data, 0) == ctx->height);
-    assert(SACARGgetShape(pixel_data, 1) == ctx->width);
-    assert(SACARGgetShape(pixel_data, 2) == 3);
+    assert(SACARGgetDim(sacPixels) == 3);
+    assert(SACARGgetShape(sacPixels, 2) == 3);
 
-    const int *src_pixels = SACARGgetSharedData(SACTYPE__MAIN__int, pixel_data);
+    const int srcHeight = SACARGgetShape(sacPixels, 0);
+    const int srcWidth = SACARGgetShape(sacPixels, 1);
+    const int *srcPixels = SACARGgetSharedData(SACTYPE__MAIN__int, sacPixels);
 
-    uint8_t *dst_pixels;
+    uint8_t *dstPixels;
     int pitch;
-    if (!SDL_LockTexture(ctx->texture, NULL, (void **)&dst_pixels, &pitch)) {
+    if (!SDL_LockTexture(ctx->texture, NULL, (void **)&dstPixels, &pitch)) {
         SAC_RuntimeError("SDL_LockTexture failed: %s", SDL_GetError());
     }
 
-    for (size_t y = 0; y < ctx->height; y++) {
-        const int *src_row = src_pixels + y * ctx->width * 3;
-        uint8_t *dst_row = dst_pixels + y * pitch;
+    for (size_t y = 0; y < MIN(srcHeight, ctx->height - yOffset); y++) {
+        const int *srcRow = srcPixels + y * srcWidth * 3;
+        uint8_t *dstRow = dstPixels + (yOffset + y) * pitch;
 
-        for (size_t x = 0; x < 3 * ctx->width; x += 3) {
-            dst_row[x + 0] = (uint8_t)(src_row[x + 0]);
-            dst_row[x + 1] = (uint8_t)(src_row[x + 1]);
-            dst_row[x + 2] = (uint8_t)(src_row[x + 2]);
+        for (size_t x = 0; x < 3 * MIN(srcWidth, ctx->width - xOffset); x += 3) {
+            dstRow[xOffset + x + 0] = (uint8_t)(srcRow[x + 0]);
+            dstRow[xOffset + x + 1] = (uint8_t)(srcRow[x + 1]);
+            dstRow[xOffset + x + 2] = (uint8_t)(srcRow[x + 2]);
         }
     }
-
-    // Clearing should not be necessary since we overwrite the entire texture with non-transparent pixels
-    //SDL_RenderClear(ctx->renderer);
 
     SDL_UnlockTexture(ctx->texture);
     SDL_RenderTexture(ctx->renderer, ctx->texture, NULL, NULL);
     SDL_RenderPresent(ctx->renderer);
+}
+
+void SAC_DrawPixels(SDLcontext *ctx, SACarg *sacPixels)
+{
+    SAC_DrawPixelsOffset(ctx, sacPixels, 0, 0);
 }
 
 SACarg *SAC_GetSelection(SDLcontext *ctx)

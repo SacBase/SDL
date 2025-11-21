@@ -10,6 +10,13 @@ external SDLdisplay initDisplay(int h, int w);
     #pragma linkwith "SDL3"
     #pragma linksign [0,1,2]
 
+external SDLdisplay drawPixelsOffset(SDLdisplay ctx, int[h,w,3] pixels, int xOffset, int yOffset);
+    #pragma linkname "SAC_DrawPixelsOffset"
+    #pragma linkobj "src/sdl3.o"
+    #pragma linkwith "SDL3"
+    #pragma linksign [1,1,2,3,4]
+    #pragma sacarg [2]
+
 external SDLdisplay drawPixels(SDLdisplay ctx, int[h,w,3] pixels);
     #pragma linkname "SAC_DrawPixels"
     #pragma linkobj "src/sdl3.o"

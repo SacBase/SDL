@@ -78,7 +78,7 @@ Color8[2:oshp] stretchRgb(Color8[2:shp] arr, int stretch)
 }
 
 int main() {
-    ctx = initDisplay(YRES*EXPAND, XRES*EXPAND);
+    ctx = initDisplay(YRES*EXPAND+100, XRES*EXPAND+100);
     cmin = [toc(-2.2, -1.0)];
     cmax = [toc( 0.8,  1.0)];
 
@@ -96,7 +96,7 @@ int main() {
             rgb = intToMonochrome(ts);
             //rgb = doubleToRgb(nvs);
             rgb = stretchRgb(rgb, expand);
-            ctx = drawPixels(ctx, toi(rgb));
+            ctx = drawPixelsOffset(ctx, toi(rgb), 150, 150);
 
             xres *= 2;
             yres *= 2;
