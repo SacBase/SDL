@@ -10,7 +10,6 @@ static int SAC_EventHandler(SDLcontext *ctx)
 {
     while (ctx->running) {
         SDL_Event event;
-
         if (!SDL_WaitEvent(&event)) {
             SAC_RuntimeError("SDL_WaitEvent failed: %s", SDL_GetError());
         }
@@ -21,28 +20,28 @@ static int SAC_EventHandler(SDLcontext *ctx)
                 break;
 
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                if (event.button.button == SDL_BUTTON_LEFT && ctx->selectionMode == SEL_from) {
-                    ctx->selectionCoords[0] = event.button.x;
-                    ctx->selectionCoords[1] = event.button.y;
-                    ctx->selectionMode = SEL_to;
+                if (event.button.button == SDL_BUTTON_LEFT && ctx->selection.mode == SEL_from) {
+                    ctx->selection.coords[0] = event.button.x;
+                    ctx->selection.coords[1] = event.button.y;
+                    ctx->selection.mode = SEL_to;
                 }
                 break;
 
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                if (event.button.button == SDL_BUTTON_LEFT && ctx->selectionMode == SEL_to) {
-                    ctx->selectionCoords[2] = event.button.x;
-                    ctx->selectionCoords[3] = event.button.y;
-                    ctx->selectionMode = SEL_none;
-                    SDL_SignalSemaphore(ctx->waitForSelection);
+                if (event.button.button == SDL_BUTTON_LEFT && ctx->selection.mode == SEL_to) {
+                    ctx->selection.coords[2] = event.button.x;
+                    ctx->selection.coords[3] = event.button.y;
+                    ctx->selection.mode = SEL_none;
+                    SDL_SignalSemaphore(ctx->selection.isSelecting);
                 }
                 // Undo selection if the right mouse button was pressed
-                if (event.button.button == SDL_BUTTON_RIGHT && ctx->selectionMode != SEL_none) {
-                    ctx->selectionCoords[0] = -1;
-                    ctx->selectionCoords[1] = -1;
-                    ctx->selectionCoords[2] = -1;
-                    ctx->selectionCoords[3] = -1;
-                    ctx->selectionMode = SEL_none;
-                    SDL_SignalSemaphore(ctx->waitForSelection);
+                if (event.button.button == SDL_BUTTON_RIGHT && ctx->selection.mode != SEL_none) {
+                    ctx->selection.coords[0] = -1;
+                    ctx->selection.coords[1] = -1;
+                    ctx->selection.coords[2] = -1;
+                    ctx->selection.coords[3] = -1;
+                    ctx->selection.mode = SEL_none;
+                    SDL_SignalSemaphore(ctx->selection.isSelecting);
                 }
                 break;
 
@@ -51,9 +50,6 @@ static int SAC_EventHandler(SDLcontext *ctx)
         }
     }
 
-    SDL_DestroyTexture(ctx->texture);
-    SDL_DestroyRenderer(ctx->renderer);
-    SDL_DestroyWindow(ctx->window);
     SDL_Quit();
     exit(0);
 }
@@ -86,8 +82,13 @@ SDLcontext *SAC_InitDisplay(int height, int width)
         SAC_RuntimeError("SDL_CreateThread failed: %s", SDL_GetError());
     }
 
-    ctx->waitForSelection = SDL_CreateSemaphore(0);
-    if (ctx->waitForSelection == NULL) {
+    ctx->selection = (SDLselection){
+        .isSelecting = SDL_CreateSemaphore(0),
+        .mode = SEL_none,
+        .coords = {-1, -1, -1, -1},
+    };
+
+    if (ctx->selection.isSelecting == NULL) {
         SAC_RuntimeError("SDL_CreateSemaphore failed: %s", SDL_GetError());
     }
 
@@ -132,25 +133,25 @@ void SAC_DrawPixels(SDLcontext *ctx, SACarg *pixel_data)
 
 SACarg *SAC_GetSelection(SDLcontext *ctx)
 {
-    ctx->selectionMode = SEL_from;
-    SDL_WaitSemaphore(ctx->waitForSelection);
-    assert(ctx->selectionMode == SEL_none);
+    ctx->selection.mode = SEL_from;
+    SDL_WaitSemaphore(ctx->selection.isSelecting);
+    assert(ctx->selection.mode == SEL_none);
 
     int *res = malloc(4 * sizeof(int));
     // Ensure coordinates are [topleft, bottomright] and each of the form [y,x]
-    if (ctx->selectionCoords[0] <= ctx->selectionCoords[2]) {
-        res[1] = ctx->selectionCoords[0];
-        res[3] = ctx->selectionCoords[2];
+    if (ctx->selection.coords[0] <= ctx->selection.coords[2]) {
+        res[1] = ctx->selection.coords[0];
+        res[3] = ctx->selection.coords[2];
     } else {
-        res[1] = ctx->selectionCoords[2];
-        res[3] = ctx->selectionCoords[0];
+        res[1] = ctx->selection.coords[2];
+        res[3] = ctx->selection.coords[0];
     }
-    if (ctx->selectionCoords[1] <= ctx->selectionCoords[3]) {
-        res[0] = ctx->selectionCoords[1];
-        res[2] = ctx->selectionCoords[3];
+    if (ctx->selection.coords[1] <= ctx->selection.coords[3]) {
+        res[0] = ctx->selection.coords[1];
+        res[2] = ctx->selection.coords[3];
     } else {
-        res[0] = ctx->selectionCoords[3];
-        res[2] = ctx->selectionCoords[1];
+        res[0] = ctx->selection.coords[3];
+        res[2] = ctx->selection.coords[1];
     }
 
     return SACARGcreateFromPointer(SACTYPE__MAIN__int, (void *)res, 2, 2, 2);
@@ -168,10 +169,6 @@ int SAC_CloseDisplay(SDLcontext *ctx)
 
     int exitStatus;
     SDL_WaitThread(ctx->eventHandler, &exitStatus);
-
-    SDL_DestroyTexture(ctx->texture);
-    SDL_DestroyRenderer(ctx->renderer);
-    SDL_DestroyWindow(ctx->window);
     SDL_Quit();
 
     return exitStatus;

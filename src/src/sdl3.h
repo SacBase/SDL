@@ -13,6 +13,12 @@ typedef enum {
     SEL_to,
 } selmode_t;
 
+typedef struct SDLselection {
+    SDL_Semaphore *isSelecting;
+    selmode_t mode;
+    int coords[4];
+} SDLselection;
+
 typedef struct SDLcontext {
     bool running;
     size_t width, height;
@@ -20,9 +26,7 @@ typedef struct SDLcontext {
     SDL_Renderer *renderer;
     SDL_Texture *texture;
     SDL_Thread *eventHandler;
-    SDL_Semaphore *waitForSelection;
-    int selectionCoords[4];
-    selmode_t selectionMode;
+    SDLselection selection;
 } SDLcontext;
 
 extern SDLcontext *SAC_InitDisplay(int height, int width);
