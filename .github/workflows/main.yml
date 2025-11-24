@@ -1,47 +1,22 @@
-name: Build On Changes
+name: Build
 
-on: [pull_request]
-
-env:
-  BASE_URL: https://gitlab.sac-home.org/sac-group/sac-packages/-/raw/master/latest/weekly
+on: [push, pull_request]
 
 jobs:
-  build-ubuntu24:
-    runs-on: ubuntu-24.04
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    container:
+      image: sacbase/sac-compiler
     steps:
-      - name: Get HEAD and submodules
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v5
         with:
-          fetch-depth: 0
           submodules: 'recursive'
-      - name: Install SDL
+      - name: Configure sac2c
+        run: cp -r /root/.sac2crc $HOME/.sac2crc
+      - name: Install SDL3
         run: |
-          sudo apt update
-          sudo apt upgrade -y
-          sudo apt install -y libsdl1.2-dev libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
-      - name: Install SaC
-        run: |
-          wget -q ${BASE_URL}/Ubl22/sac2c-basic.deb
-          sudo apt install ./sac2c-basic.deb
-          sac2c -V
-      - name: Install Stdlib
-        run: |
-          wget -q ${BASE_URL}/Ubl22/stdlib-basic.deb
-          sudo apt install ./stdlib-basic.deb
-      - name: Create build dir
-        run: |
-          cmake -E make_directory ${{runner.workspace}}/build
-          mkdir $HOME/.sac2crc
-      - name: Configure build-system
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        run: cmake $GITHUB_WORKSPACE
+          apt update
+          apt upgrade -y
+          apt install -y libsdl3-dev libsdl3-image-dev libsdl3-ttf-dev
       - name: Build
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        run: |
-          cmake --build . -j 4 2>&1 | tee build.log
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "!!! ERROR detected in build !!!";
-            exit 1;
-          fi
+        run: make
