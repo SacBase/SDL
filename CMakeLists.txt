@@ -8,6 +8,7 @@ SET (DLL_BUILD_DIR "${PROJECT_BINARY_DIR}/lib")
 # For what targets we build modules
 SET (TARGETS    seq seq_checks mt_pth CACHE STRING "Build for these targets")
 SET (SAC2C_EXEC                       CACHE STRING "Path to sac2c compiler")
+OPTION (BUILDGENERIC "Do not use architecture-specific optimisations" OFF)
 
 # Check whether sac2c is operational
 LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-common")
@@ -20,6 +21,10 @@ FIND_PACKAGE (X11 REQUIRED)
 
 SET (SAC2C_EXTRA_INC "-I${X11_INCLUDE_DIR}")
 SET (SAC2C_CPP_INC "-Xl" "-lX11" "-Xtl" "-lX11")
+
+IF (BUILDGENERIC)
+    LIST (APPEND SAC2C_CPP_INC "-generic")
+ENDIF ()
 
 # For every target run CMakeLists.txt in src
 FOREACH (TARGET IN ITEMS ${TARGETS})
