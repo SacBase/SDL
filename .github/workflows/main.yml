@@ -14,9 +14,6 @@ jobs:
       - name: Configure sac2c
         run: cp -r /root/.sac2crc $HOME/.sac2crc
       - name: Install SDL3
-        run: |
-          apt update
-          apt upgrade -y
-          apt install -y libsdl3-dev libsdl3-image-dev libsdl3-ttf-dev
+        run: apt install -y libsdl3-dev libsdl3-image-dev libsdl3-ttf-dev
       - name: Build
         run: make
