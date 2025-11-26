@@ -1,0 +1,27 @@
+use SDLdisplay: all;
+
+external uint sleep(uint x);
+    #pragma effect World::TheWorld
+    #pragma linksign [0,1]
+    #pragma linkname "sleep"
+    #pragma header "<unistd.h>"
+
+int[w,h,3] makePixels(int w, int h)
+{
+    return { [i,j] -> [_mod_SxS_(i, 256), _mod_SxS_(j, 256), 0]
+           | [i,j] < [w,h] };
+}
+
+int main() {
+    XRES = 640;
+    YRES = 480;
+
+    ctx = initDisplay(YRES, XRES);
+    pixels = makePixels(YRES, XRES);
+    ctx = drawPixels(ctx, pixels);
+
+    _ = sleep(5ui);
+
+    status = closeDisplay(ctx);
+    return status;
+}

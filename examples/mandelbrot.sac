@@ -1,0 +1,122 @@
+use SDLdisplay: all;
+use Structures: all;
+use Numerical: { log2 };
+use StdIO: all;
+
+#define XRES 16
+#define YRES 9
+#define EXPAND 64
+#define DEPTH 1024
+
+inline
+complex[h,w] genComplexArray(int h, int w, complex cmin, complex cmax)
+{
+    dR = real(cmax) - real(cmin);
+    dI = imag(cmax) - imag(cmin);
+    return { [y,x] -> cmin + toc(tod(x) * dR / tod(w),
+                                 tod(y) * dI / tod(h))
+           | [y,x] < [h,w] };
+}
+
+inline
+int, complex escapeTimeAndValue(complex c, int depth)
+{
+    i = 0;
+    z = c;
+
+    while (i < depth && normSq(z) <= 4d) {
+        z = z * z + c;
+        i += 1;
+    }
+
+    return (i, z);
+}
+
+inline
+int[2:shp], complex[2:shp] escapeTimeAndValue(complex[2:shp] arr, int depth)
+{
+    ts, vs = { iv -> escapeTimeAndValue(arr[iv], depth) | iv < shp };
+    return (ts, vs);
+}
+
+inline
+double[2:shp] normalizeIterationCount(int[2:shp] ts, complex[2:shp] vs)
+{
+    return where(norm(vs) <= 2d,
+                 0d,
+                 tod(ts + 1) - log2(log2(norm(vs))));
+}
+
+inline
+Color8[2:shp] doubleToRgb(double[2:shp] arr)
+{
+    min = minval(arr);
+    max = maxval(arr);
+    scaled = (arr - min) / (max - min);
+
+    //return Hsb2Rgb(toi(scaled * 360d), 60, 80);
+
+    scaled = toi(scaled * 255d);
+    clut = genLogarithmicClut( 0.4d, 0.9d, Color8::black(), Color8::red());
+    return { iv -> clut[scaled[iv]] | iv < shp };
+}
+
+inline
+Color8[2:shp] intToMonochrome(int[2:shp] a)
+{
+    clut = genLogarithmicClut( 0.4d, 0.9d, Color8::black(), Color8::red());
+
+    a = (a * 255) / maxval(a);
+
+    return { iv -> clut[ a[ iv] ] };
+}
+
+inline
+Color8[2:oshp] stretchRgb(Color8[2:shp] arr, int stretch)
+{
+    return { iv -> arr[iv / stretch] | iv < shp * stretch };
+}
+
+int main() {
+    ctx = initDisplay(YRES*EXPAND+100, XRES*EXPAND+100);
+    cmin = [toc(-2.2, -1.0)];
+    cmax = [toc( 0.8,  1.0)];
+
+    while (isRunning(ctx)) {
+        xres = XRES;
+        yres = YRES;
+        expand = EXPAND;
+
+        do {
+            arr = genComplexArray(yres, xres, cmin[0], cmax[0]);
+
+            ts, vs = escapeTimeAndValue(arr, DEPTH);
+
+            nvs = normalizeIterationCount(ts, vs);
+            rgb = intToMonochrome(ts);
+            //rgb = doubleToRgb(nvs);
+            rgb = stretchRgb(rgb, expand);
+            ctx = drawPixelsOffset(ctx, toi(rgb), 150, 150);
+
+            xres *= 2;
+            yres *= 2;
+            expand /= 2;
+        } while (expand > 0);
+
+        printf("Waiting for selection...\n");
+        zoomCoords, ctx = getSelection(ctx);
+        if (all(zoomCoords >= 0)) {
+            printf("Received selection [[%d,%d],[%d,%d]]\n", zoomCoords[0,0], zoomCoords[0,1], zoomCoords[1,0], zoomCoords[1,1]);
+            cmin = [arr[zoomCoords[0]]] ++ cmin;
+            cmax = [arr[zoomCoords[1]]] ++ cmax;
+        } else if (shape(cmin)[0] > 1) {
+            // Undo the last selection, if any
+            printf("Undo last selection\n");
+            cmin = drop([1], cmin);
+            cmax = drop([1], cmax);
+        }
+    }
+
+    status = closeDisplay(ctx);
+    return status;
+}
