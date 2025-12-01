@@ -16,17 +16,15 @@ interfaces.
 Build Instructions
 ------------------
 
-You'll need to have installed `sac2c` and have a copy of the Stdlib
-installed as well. You'll also need to have `SDL` version 1 C-library and most
-likely operational `pthreads`. NB. The SDL version 2 library is not, at present,
-supported.
+You'll need to have installed `sac2c` and have a copy of the Stdlib installed as well.
+You'll also need to have the `SDL3` C-library and most likely operational `pthreads`.
 
-```sh
+The project uses `cmake-common`.
+Upon cloning this repo it is important initialize submodules.
+
+```bash
 git submodule update --init --recursive
-mkdir build
-cd build
-cmake <OPTIONS> ..
-make -j4
+make
 ```
 
 Variables that can be passed to CMake

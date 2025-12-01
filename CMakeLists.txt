@@ -23,7 +23,6 @@ FIND_PACKAGE (X11 REQUIRED)
 SET (SAC2C_EXTRA_INC "-I${X11_INCLUDE_DIR}")
 SET (SAC2C_CPP_INC "-Xl" "-lX11" "-Xtl" "-lX11")
 
-
 # Check if sac2c suppports building generically
 IF (BUILDGENERIC)
     CHECK_SAC2C_SUPPORT_FLAG ("generic" "-generic")
