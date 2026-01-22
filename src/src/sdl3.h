@@ -16,7 +16,7 @@ typedef enum {
 typedef struct SDLselection {
     SDL_Semaphore *isSelecting;
     selmode_t mode;
-    int coords[4];
+    sac_int coords[4];
 } SDLselection;
 
 typedef struct SDLcontext {
