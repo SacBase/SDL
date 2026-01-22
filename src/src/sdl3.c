@@ -180,11 +180,11 @@ sac_int SAC_CloseDisplay(SDLcontext *ctx)
         }
     }
 
-    int exitStatus;
-    SDL_WaitThread(ctx->eventHandler, &exitStatus);
+    int status;
+    SDL_WaitThread(ctx->eventHandler, &status);
     SDL_Quit();
 
-    return (sac_int)exitStatus;
+    return (sac_int)status;
 }
 
 bool SAC_IsRunning(SDLcontext *ctx)
