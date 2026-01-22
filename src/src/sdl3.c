@@ -78,11 +78,11 @@ SDLcontext *SAC_InitDisplay(sac_int height, sac_int width)
         SAC_RuntimeError("SDL_Init failed: %s", SDL_GetError());
     }
 
-    if(!SDL_CreateWindowAndRenderer("SaC SDL3", width, height, 0, &ctx->window, &ctx->renderer)) {
+    if(!SDL_CreateWindowAndRenderer("SaC SDL3", (int)width, (int)height, 0, &ctx->window, &ctx->renderer)) {
         SAC_RuntimeError("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());
     }
 
-    ctx->texture = SDL_CreateTexture(ctx->renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, width, height);
+    ctx->texture = SDL_CreateTexture(ctx->renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, (int)width, (int)height);
     if(ctx->texture == NULL) {
         SAC_RuntimeError("SDL_CreateTexture failed: %s", SDL_GetError());
     }
@@ -122,11 +122,11 @@ void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, sac_int xOffset, s
         SAC_RuntimeError("SDL_LockTexture failed: %s", SDL_GetError());
     }
 
-    for (size_t y = 0; y < MIN(srcHeight, ctx->height - yOffset); y++) {
+    for (sac_int y = 0; y < MIN(srcHeight, (sac_int)ctx->height - yOffset); y++) {
         const sac_int *srcRow = srcPixels + y * srcWidth * 3;
-        uint8_t *dstRow = dstPixels + (yOffset + y) * pitch;
+        uint8_t *dstRow = dstPixels + (yOffset + y) * (sac_int)pitch;
 
-        for (size_t x = 0; x < 3 * MIN(srcWidth, ctx->width - xOffset); x += 3) {
+        for (sac_int x = 0; x < 3 * MIN(srcWidth, (sac_int)ctx->width - xOffset); x += 3) {
             dstRow[xOffset + x + 0] = (uint8_t)(srcRow[x + 0]);
             dstRow[xOffset + x + 1] = (uint8_t)(srcRow[x + 1]);
             dstRow[xOffset + x + 2] = (uint8_t)(srcRow[x + 2]);
