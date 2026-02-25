@@ -29,11 +29,11 @@ typedef struct SDLcontext {
     SDLselection selection;
 } SDLcontext;
 
-extern SDLcontext *SAC_InitDisplay(int height, int width);
-extern void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, int xOffset, int yOffset);
+extern SDLcontext *SAC_InitDisplay(sac_int height, sac_int width);
+extern void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, sac_int xOffset, sac_int yOffset);
 extern void SAC_DrawPixels(SDLcontext *ctx, SACarg *sacPixels);
 extern SACarg *SAC_GetSelection(SDLcontext *ctx);
-extern int SAC_CloseDisplay(SDLcontext *ctx);
+extern sac_int SAC_CloseDisplay(SDLcontext *ctx);
 extern bool SAC_IsRunning(SDLcontext *ctx);
 
 #endif /* _SACSDL3_H_ */

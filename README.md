@@ -17,7 +17,7 @@ Build Instructions
 ------------------
 
 You'll need to have installed `sac2c` and have a copy of the Stdlib installed as well.
-You'll also need to have the `SDL3` C-library and most likely operational `pthreads`.
+You'll also need to have at least `pthreads` and the `SDL3` C-library (e.g. `libsdl3-dev libsdl3-image-dev libsdl3-ttf-dev`).
 
 The project uses `cmake-common`.
 Upon cloning this repo it is important initialize submodules.

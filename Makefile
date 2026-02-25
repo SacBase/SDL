@@ -1,5 +1,7 @@
 SAC2C ?= sac2c
-TARGETS ?= "seq;seq_checks;mt_pth"
+# Uniqueness violation bug in seq_checks
+#TARGETS ?= "seq;seq_checks;mt_pth"
+TARGETS ?= "seq;mt_pth"
 BUILD_DIR ?= build
 
 .PHONY: all build clean

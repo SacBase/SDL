@@ -59,7 +59,7 @@ static int SAC_EventHandler(void *data)
     exit(0);
 }
 
-SDLcontext *SAC_InitDisplay(int height, int width)
+SDLcontext *SAC_InitDisplay(sac_int height, sac_int width)
 {
     SDLcontext *ctx = (SDLcontext *)malloc(sizeof(SDLcontext));
     ctx->width = width;
@@ -102,14 +102,14 @@ SDLcontext *SAC_InitDisplay(int height, int width)
     return ctx;
 }
 
-void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, int xOffset, int yOffset)
+void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, sac_int xOffset, sac_int yOffset)
 {
     assert(SACARGgetDim(sacPixels) == 3);
     assert(SACARGgetShape(sacPixels, 2) == 3);
 
-    const int srcHeight = SACARGgetShape(sacPixels, 0);
-    const int srcWidth = SACARGgetShape(sacPixels, 1);
-    const int *srcPixels = SACARGgetSharedData(SACTYPE__MAIN__int, sacPixels);
+    const sac_int srcHeight = SACARGgetShape(sacPixels, 0);
+    const sac_int srcWidth = SACARGgetShape(sacPixels, 1);
+    const sac_int *srcPixels = SACARGgetSharedData(SACTYPE__MAIN__int, sacPixels);
 
     uint8_t *dstPixels;
     int pitch;
@@ -118,7 +118,7 @@ void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, int xOffset, int y
     }
 
     for (size_t y = 0; y < MIN(srcHeight, ctx->height - yOffset); y++) {
-        const int *srcRow = srcPixels + y * srcWidth * 3;
+        const sac_int *srcRow = srcPixels + y * srcWidth * 3;
         uint8_t *dstRow = dstPixels + (yOffset + y) * pitch;
 
         for (size_t x = 0; x < 3 * MIN(srcWidth, ctx->width - xOffset); x += 3) {
@@ -144,7 +144,7 @@ SACarg *SAC_GetSelection(SDLcontext *ctx)
     SDL_WaitSemaphore(ctx->selection.isSelecting);
     assert(ctx->selection.mode == SEL_none);
 
-    int *res = malloc(4 * sizeof(int));
+    sac_int *res = malloc(4 * sizeof(sac_int));
     // Ensure coordinates are [topleft, bottomright] and each of the form [y,x]
     if (ctx->selection.coords[0] <= ctx->selection.coords[2]) {
         res[1] = ctx->selection.coords[0];
@@ -161,10 +161,11 @@ SACarg *SAC_GetSelection(SDLcontext *ctx)
         res[2] = ctx->selection.coords[1];
     }
 
-    return SACARGcreateFromPointer(SACTYPE__MAIN__int, (void *)res, 2, 2, 2);
+    sac_int shp[] = { 2, 2 };
+    return SACARGcreateFromPointer(SACTYPE__MAIN__int, (void *)res, 2, shp);
 }
 
-int SAC_CloseDisplay(SDLcontext *ctx)
+sac_int SAC_CloseDisplay(SDLcontext *ctx)
 {
     if (ctx->running) {
         SDL_Event quitEvent;
@@ -178,7 +179,7 @@ int SAC_CloseDisplay(SDLcontext *ctx)
     SDL_WaitThread(ctx->eventHandler, &exitStatus);
     SDL_Quit();
 
-    return exitStatus;
+    return (sac_int)exitStatus;
 }
 
 bool SAC_IsRunning(SDLcontext *ctx)
