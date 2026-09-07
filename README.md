@@ -21,15 +21,14 @@ git submodule update --init --recursive
 make
 ```
 
-## Variables that can be passed to CMake
+## CMake Variables
 
 When running CMake it is possible to pass the following variables:
  * `-DTARGETS=x;y;z`: build for targets x, y and z.
 
    *Default:* `seq;seq_checks;mt_pth`
  * `-DSAC2C_EXEC=/path/to/sac2c`: specify `sac2c` executable directly. Otherwise CMake will try to find it on your path.
- * `-DLINKSETSIZE=n`: set `-linksetsize n` when calling `sac2c`.
-   This option is responsible for the number of C functions that are put in a single C file when compiling a SaC program.
+ * `-DLINKSETSIZE=n`: This option is responsible for the number of C functions that are put in a single C file when compiling a SaC program.
    The rule of thumb:
     * `0` is the fastest time-wise but potentially results in a large memory consumption.
     * `1` reduces the memory consumption to minimum, buy significantly increases compilation time.
