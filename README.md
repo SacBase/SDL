@@ -34,3 +34,21 @@ When running CMake it is possible to pass the following variables:
     * `1` reduces the memory consumption to minimum, buy significantly increases compilation time.
 
       *Default: 500*
+
+## Running with Docker and X11
+
+*This is an example, you might have to adjust these commands to work for your setup.*
+
+```bash
+xhost +local:docker
+
+docker pull sacbase/sac-compiler:latest
+
+docker run -it --rm \
+  -e DISPLAY=$DISPLAY \
+  -e SDL_VIDEODRIVER=x11 \
+  -e LIBGL_ALWAYS_SOFTWARE=1 \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -v "$(pwd):/home" \
+  sacbase/sac-compiler:latest
+```
