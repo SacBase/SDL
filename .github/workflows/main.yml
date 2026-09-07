@@ -13,6 +13,8 @@ jobs:
           submodules: 'recursive'
       - name: Install SDL3
         run: apt install -y libsdl3-dev libsdl3-image-dev libsdl3-ttf-dev
+      - name: Configure sac2c
+        run: cp -r /root/.sac2crc $HOME/.sac2crc
       - name: Setup CMake
         run: cmake -DTARGETS="seq;mt_pth" -B build
       - name: Build
