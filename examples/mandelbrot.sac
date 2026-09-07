@@ -78,24 +78,29 @@ Color8[2:oshp] stretchRgb(Color8[2:shp] arr, int stretch)
 }
 
 int main() {
+    printf("Creating display\n");
     ctx = initDisplay(YRES*EXPAND+100, XRES*EXPAND+100);
     cmin = [toc(-2.2, -1.0)];
     cmax = [toc( 0.8,  1.0)];
 
-    while (isRunning(ctx)) {
+    running = true;
+    do {
         xres = XRES;
         yres = YRES;
         expand = EXPAND;
 
         do {
+            printf("Generating pixels\n");
             arr = genComplexArray(yres, xres, cmin[0], cmax[0]);
 
             ts, vs = escapeTimeAndValue(arr, DEPTH);
 
             nvs = normalizeIterationCount(ts, vs);
             rgb = intToMonochrome(ts);
-            //rgb = doubleToRgb(nvs);
+            rgb = doubleToRgb(nvs);
             rgb = stretchRgb(rgb, expand);
+
+            printf("Drawing pixels\n");
             ctx = drawPixelsOffset(ctx, toi(rgb), 150, 150);
 
             xres *= 2;
@@ -115,8 +120,13 @@ int main() {
             cmin = drop([1], cmin);
             cmax = drop([1], cmax);
         }
-    }
 
+        running, ctx = isRunning(ctx);
+    } while (running);
+
+    printf("Closing display\n");
     status = closeDisplay(ctx);
+
+    printf("Done\n");
     return status;
 }
