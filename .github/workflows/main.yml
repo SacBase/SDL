@@ -16,6 +16,6 @@ jobs:
       - name: Configure sac2c
         run: cp -r /root/.sac2crc $HOME/.sac2crc
       - name: Setup CMake
-        run: cmake -DTARGETS="seq;mt_pth" -B build
+        run: cmake -DTARGETS="seq;seq_checks;mt_pth" -B build
       - name: Build
         run: cmake --build build
