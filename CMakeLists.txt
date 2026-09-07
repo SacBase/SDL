@@ -18,10 +18,16 @@ INCLUDE ("cmake-common/misc-macros.cmake")
 
 SET (SDL_BUILDING_LIBRARY ON)
 FIND_PACKAGE (SDL3 REQUIRED)
-FIND_PACKAGE (X11 REQUIRED)
 
-SET (SAC2C_EXTRA_INC "-I${X11_INCLUDE_DIR}")
-SET (SAC2C_CPP_INC "-Xl" "-lX11" "-Xtl" "-lX11")
+# X11 is needed for X-forwarding over SSH
+FIND_PACKAGE (X11 QUIET)
+
+IF (X11_FOUND)
+    MESSAGE (STATUS "X11 found")
+    SET (SAC2C_CC_FLAGS "-DHAVE_X11")
+    SET (SAC2C_EXTRA_INC "-I${X11_INCLUDE_DIR}")
+    SET (SAC2C_CPP_INC "-Xl" "-lX11" "-Xtl" "-lX11")
+ENDIF ()
 
 # Check if sac2c suppports building generically
 IF (BUILDGENERIC)

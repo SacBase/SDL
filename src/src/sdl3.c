@@ -2,7 +2,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <SDL3/SDL.h>
+
+#ifdef HAVE_X11
 #include <X11/Xlib.h>
+#endif
 
 #include "sdl3.h"
 
@@ -66,8 +69,10 @@ SDLcontext *SAC_InitDisplay(sac_int height, sac_int width)
     ctx->height = height;
     ctx->running = true;
 
+#ifdef HAVE_X11
     // Fix for using SDL with X-forwarding over SSH
     XInitThreads();
+#endif
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SAC_RuntimeError("SDL_Init failed: %s", SDL_GetError());
