@@ -8,12 +8,12 @@ jobs:
     container:
       image: sacbase/sac-compiler
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: 'recursive'
-      - name: Configure sac2c
-        run: cp -r /root/.sac2crc $HOME/.sac2crc
       - name: Install SDL3
         run: apt install -y libsdl3-dev libsdl3-image-dev libsdl3-ttf-dev
+      - name: Setup CMake
+        run: cmake -DTARGETS="seq;mt_pth" -B build
       - name: Build
-        run: make
+        run: cmake --build build
