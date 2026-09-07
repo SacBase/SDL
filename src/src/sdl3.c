@@ -81,6 +81,7 @@ SDLcontext *SAC_InitDisplay(sac_int height, sac_int width)
         SAC_RuntimeError("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());
     }
 
+    // printf("Creating a texture of size [%"PRIisac",%"PRIisac"]\n", width, height);
     ctx->texture = SDL_CreateTexture(ctx->renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, (int)width, (int)height);
     if(ctx->texture == NULL) {
         SAC_RuntimeError("SDL_CreateTexture failed: %s", SDL_GetError());
@@ -121,20 +122,44 @@ void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, sac_int xOffset, s
     const sac_int srcWidth = SACARGgetShape(sacPixels, 1);
     const sac_int *srcPixels = SACARGgetSharedData(SACTYPE__MAIN__int, sacPixels);
 
+    assert(srcPixels != NULL);
+    assert(xOffset >= 0 && xOffset < (sac_int)ctx->width);
+    assert(yOffset >= 0 && yOffset < (sac_int)ctx->height);
+
+    // printf("Drawing pixels with offset [%"PRIisac",%"PRIisac"] and shape [%"PRIisac",%"PRIisac"]\n",
+    //        xOffset, yOffset, srcWidth, srcHeight);
+
     uint8_t *dstPixels;
-    int pitch;
+    int pitch; // The pitch of the locked pixels; the pitch is the length of one row in bytes.
     if (!SDL_LockTexture(ctx->texture, NULL, (void **)&dstPixels, &pitch)) {
         SAC_RuntimeError("SDL_LockTexture failed: %s", SDL_GetError());
     }
 
-    for (sac_int y = 0; y < MIN(srcHeight, (sac_int)ctx->height - yOffset); y++) {
-        const sac_int *srcRow = srcPixels + y * srcWidth * 3;
-        uint8_t *dstRow = dstPixels + (yOffset + y) * (sac_int)pitch;
+    assert(pitch > 0);
+    assert(dstPixels != NULL);
+    // printf("pitch=%d bytes=%zu\n", pitch, (size_t)pitch * ctx->height);
 
-        for (sac_int x = 0; x < 3 * MIN(srcWidth, (sac_int)ctx->width - xOffset); x += 3) {
-            dstRow[3 * xOffset + x + 0] = (uint8_t)(srcRow[x + 0]);
-            dstRow[3 * xOffset + x + 1] = (uint8_t)(srcRow[x + 1]);
-            dstRow[3 * xOffset + x + 2] = (uint8_t)(srcRow[x + 2]);
+    sac_int copyWidth = MIN(srcWidth, (sac_int)ctx->width - xOffset);
+    sac_int copyHeight = MIN(srcHeight, (sac_int)ctx->height - yOffset);
+    // printf("Copying a total of [%"PRIisac",%"PRIisac"] pixels\n", copyWidth, copyHeight);
+
+    for (sac_int y = 0; y < copyHeight; y++) {
+        assert(3 * y * srcWidth < srcWidth * srcHeight * 3);
+        assert((y + yOffset) * (sac_int)pitch < (sac_int)ctx->height * (sac_int)pitch);
+
+        const sac_int *srcRow = srcPixels + (3 * y * srcWidth);
+        uint8_t *dstRow = dstPixels + ((y + yOffset) * (sac_int)pitch);
+
+        assert(srcRow != NULL);
+        assert(dstRow != NULL);
+
+        for (sac_int x = 0; x < copyWidth; x++) {
+            assert(3 * x + 2 < srcWidth * 3);
+            assert(3 * (xOffset + x) + 2 < (sac_int)pitch);
+
+            dstRow[3 * (xOffset + x) + 0] = (uint8_t)(srcRow[3 * x + 0]);
+            dstRow[3 * (xOffset + x) + 1] = (uint8_t)(srcRow[3 * x + 1]);
+            dstRow[3 * (xOffset + x) + 2] = (uint8_t)(srcRow[3 * x + 2]);
         }
     }
 
@@ -176,9 +201,7 @@ SACarg *SAC_GetSelection(SDLcontext *ctx)
         res[2] = ctx->selection.coords[1];
     }
 
-    sac_int *shp = malloc(2 * sizeof(sac_int));
-    shp[0] = 2;
-    shp[1] = 2;
+    sac_int shp[] = { 2, 2 };
     return SACARGcreateFromPointer(SACTYPE__MAIN__int, (void *)res, 2, shp);
 }
 

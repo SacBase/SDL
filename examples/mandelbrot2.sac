@@ -3,8 +3,9 @@ use Structures: all;
 use Numerical: { log2 };
 use StdIO: all;
 
-#define XRES 640
-#define YRES 480
+#define XRES 16
+#define YRES 9
+#define EXPAND 64
 #define DEPTH 1024
 
 inline
@@ -70,25 +71,46 @@ Color8[2:shp] intToMonochrome(int[2:shp] a)
     return { iv -> clut[ a[ iv] ] };
 }
 
+inline
+Color8[2:oshp] stretchRgb(Color8[2:shp] arr, int stretch)
+{
+    return { iv -> arr[iv / stretch] | iv < shp * stretch };
+}
+
 int main() {
     printf("Creating display\n");
-    ctx = initDisplay(YRES, XRES);
+    ctx = initDisplay(YRES*EXPAND, XRES*EXPAND);
     cmin = [toc(-2.2, -1.0)];
     cmax = [toc( 0.8,  1.0)];
 
     running = true;
     do {
-        printf("Generating pixels\n");
-        arr = genComplexArray(YRES, XRES, cmin[0], cmax[0]);
+        xres = XRES;
+        yres = YRES;
+        expand = EXPAND;
 
-        ts, vs = escapeTimeAndValue(arr, DEPTH);
+        do {
+            printf("Generating pixels\n");
+            arr = genComplexArray(yres, xres, cmin[0], cmax[0]);
 
-        nvs = normalizeIterationCount(ts, vs);
-        rgb = intToMonochrome(ts);
-        rgb = doubleToRgb(nvs);
+            ts, vs = escapeTimeAndValue(arr, DEPTH);
 
-        printf("Drawing pixels\n");
-        ctx = drawPixels(ctx, toi(rgb));
+            nvs = normalizeIterationCount(ts, vs);
+            rgb = intToMonochrome(ts);
+            rgb = doubleToRgb(nvs);
+            rgb = stretchRgb(rgb, expand);
+
+            printf("Shape is [%d,%d], should be [%d,%d]\n",
+                   shape(rgb)[0], shape(rgb)[1],
+                   YRES * EXPAND, XRES * EXPAND);
+
+            printf("Drawing pixels\n");
+            ctx = drawPixels(ctx, toi(rgb));
+
+            xres *= 2;
+            yres *= 2;
+            expand /= 2;
+        } while (expand > 0);
 
         printf("Waiting for selection...\n");
         zoomCoords, ctx = getSelection(ctx);
