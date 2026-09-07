@@ -58,7 +58,6 @@ static int SAC_EventHandler(void *data)
         }
     }
 
-    SDL_Quit();
     return 0;
 }
 
@@ -102,8 +101,14 @@ SDLcontext *SAC_InitDisplay(sac_int height, sac_int width)
         SAC_RuntimeError("SDL_CreateSemaphore failed: %s", SDL_GetError());
     }
 
-    SDL_RenderClear(ctx->renderer);
-    SDL_RenderPresent(ctx->renderer);
+    if (!SDL_RenderClear(ctx->renderer)) {
+        SAC_RuntimeError("SDL_RenderClear: %s", SDL_GetError());
+    }
+
+    if (!SDL_RenderPresent(ctx->renderer)) {
+        SAC_RuntimeError("SDL_RenderPresent: %s", SDL_GetError());
+    }
+
     return ctx;
 }
 
@@ -134,8 +139,13 @@ void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, sac_int xOffset, s
     }
 
     SDL_UnlockTexture(ctx->texture);
-    SDL_RenderTexture(ctx->renderer, ctx->texture, NULL, NULL);
-    SDL_RenderPresent(ctx->renderer);
+    if (!SDL_RenderTexture(ctx->renderer, ctx->texture, NULL, NULL)) {
+        SAC_RuntimeError("SDL_RenderTexture: %s", SDL_GetError());
+    }
+
+    if (!SDL_RenderPresent(ctx->renderer)) {
+        SAC_RuntimeError("SDL_RenderPresent: %s", SDL_GetError());
+    }
 }
 
 void SAC_DrawPixels(SDLcontext *ctx, SACarg *sacPixels)
@@ -166,7 +176,9 @@ SACarg *SAC_GetSelection(SDLcontext *ctx)
         res[2] = ctx->selection.coords[1];
     }
 
-    sac_int shp[] = { 2, 2 };
+    sac_int *shp = malloc(2 * sizeof(sac_int));
+    shp[0] = 2;
+    shp[1] = 2;
     return SACARGcreateFromPointer(SACTYPE__MAIN__int, (void *)res, 2, shp);
 }
 
@@ -174,17 +186,16 @@ sac_int SAC_CloseDisplay(SDLcontext *ctx)
 {
     if (ctx->running) {
         SDL_Event quitEvent;
+        SDL_zero(quitEvent); // Initialize the event
         quitEvent.type = SDL_EVENT_QUIT;
         if (!SDL_PushEvent(&quitEvent)) {
             SAC_RuntimeError("SDL_PushEvent failed: %s", SDL_GetError());
         }
     }
 
-    int status;
-    SDL_WaitThread(ctx->eventHandler, &status);
-    SDL_Quit();
-
-    return (sac_int)status;
+    int exitStatus;
+    SDL_WaitThread(ctx->eventHandler, &exitStatus);
+    return (sac_int)exitStatus;
 }
 
 bool SAC_IsRunning(SDLcontext *ctx)
