@@ -4,6 +4,10 @@
 
 Due to a bug in the private heap manager, requires the `-noPHM` flag.
 
+The examples `minimal` and `mandelbrot` will work without it, but `mandelbrot2` will result in a segmentation fault.
+
+Note that the zoom selection in the mandelbrot code is not actually implemented correctly; feel free to fix it :)
+
 ## About
 
 This is a SaC module that wraps around the [SDL3](https://www.libsdl.org/)
@@ -35,7 +39,7 @@ When running CMake it is possible to pass the following variables:
 
       *Default: 500*
 
-## Running with Docker and X11
+## Running with Docker
 
 *This is an example, you might have to adjust these commands to work for your setup.*
 
