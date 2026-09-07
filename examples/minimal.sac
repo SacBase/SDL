@@ -1,10 +1,5 @@
+use StdIO: { printf };
 use SDLdisplay: all;
-
-external uint sleep(uint x);
-    #pragma effect World::TheWorld
-    #pragma linksign [0,1]
-    #pragma linkname "sleep"
-    #pragma header "<unistd.h>"
 
 int[w,h,3] makePixels(int w, int h)
 {
@@ -16,12 +11,19 @@ int main() {
     XRES = 640;
     YRES = 480;
 
+    printf("Creating display\n");
     ctx = initDisplay(YRES, XRES);
+
+    printf("Drawing pixels\n");
     pixels = makePixels(YRES, XRES);
     ctx = drawPixels(ctx, pixels);
 
-    _ = sleep(5ui);
+    printf("Waiting for selection...\n");
+    _zoomCoords, ctx = getSelection(ctx);
 
+    printf("Closing display\n");
     status = closeDisplay(ctx);
+
+    printf("Done\n");
     return status;
 }

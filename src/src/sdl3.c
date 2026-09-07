@@ -59,7 +59,7 @@ static int SAC_EventHandler(void *data)
     }
 
     SDL_Quit();
-    exit(0);
+    return 0;
 }
 
 SDLcontext *SAC_InitDisplay(sac_int height, sac_int width)
@@ -127,9 +127,9 @@ void SAC_DrawPixelsOffset(SDLcontext *ctx, SACarg *sacPixels, sac_int xOffset, s
         uint8_t *dstRow = dstPixels + (yOffset + y) * (sac_int)pitch;
 
         for (sac_int x = 0; x < 3 * MIN(srcWidth, (sac_int)ctx->width - xOffset); x += 3) {
-            dstRow[xOffset + x + 0] = (uint8_t)(srcRow[x + 0]);
-            dstRow[xOffset + x + 1] = (uint8_t)(srcRow[x + 1]);
-            dstRow[xOffset + x + 2] = (uint8_t)(srcRow[x + 2]);
+            dstRow[3 * xOffset + x + 0] = (uint8_t)(srcRow[x + 0]);
+            dstRow[3 * xOffset + x + 1] = (uint8_t)(srcRow[x + 1]);
+            dstRow[3 * xOffset + x + 2] = (uint8_t)(srcRow[x + 2]);
         }
     }
 
